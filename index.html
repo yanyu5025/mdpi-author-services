@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MDPI Author Services</title>
+    <link rel="stylesheet" href="fonts.css?v=20260716b" />
+    <link rel="stylesheet" href="styles.css?v=20260716l" />
+    <link rel="stylesheet" href="ux-enhance.css?v=20260716b" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <img
+            class="logo-img"
+            src="assets/mdpi-authors-services-logo.svg"
+            alt="MDPI Author Services"
+            width="125"
+            height="32"
+          />
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="#services">Language Editing</a>
+          <a href="#additional-services">More Services</a>
+          <a href="#quote">Get a Quote</a>
+          <a href="faq/language-editing.html">FAQs</a>
+        </nav>
+        <a href="#quote" class="btn btn-primary btn-sm header-cta">Get a Quote</a>
+        <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-content">
+            <p class="eyebrow">Professional editorial support for researchers</p>
+            <h1>Publish with confidence</h1>
+            <p class="hero-lead">
+              Certified English language editing, figure enhancement, and layout
+              formatting — delivered by experts. Available to MDPI and non-MDPI
+              authors worldwide.
+            </p>
+            <div class="hero-stats">
+              <div class="stat">
+                <strong>60,000+</strong>
+                <span>Papers edited</span>
+              </div>
+              <div class="stat">
+                <strong>97%</strong>
+                <span>Author satisfaction</span>
+              </div>
+              <div class="stat">
+                <strong>1 day</strong>
+                <span>Rapid turnaround</span>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <a href="#quote" class="btn btn-primary">Get a Free Quote</a>
+              <a href="#services" class="btn btn-outline">Compare editing tiers</a>
+            </div>
+            <p class="hero-micro">No commitment · Instant estimate · MDPI &amp; non-MDPI authors</p>
+          </div>
+          <aside class="hero-card campaign-card" aria-labelledby="video-campaign-title">
+            <h2 id="video-campaign-title">Bring your research to life—and save 10%</h2>
+            <p class="campaign-copy">
+              Turn your publication into a professionally scripted academic video for journal
+              pages, presentations, teaching, and social media.
+            </p>
+            <div class="campaign-offer">
+              <span class="campaign-discount">10% off</span>
+              <div>
+                <span class="campaign-code-label">Use promo code</span>
+                <strong class="campaign-code">VIDEO10</strong>
+              </div>
+            </div>
+            <p class="campaign-dates">Valid 1 July–30 December 2026</p>
+            <div class="campaign-actions">
+              <a href="video-production.html" class="btn btn-primary">Explore Video Production</a>
+              <a href="#quote" class="btn btn-outline">Get a Quote</a>
+            </div>
+          </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section journey-section" aria-labelledby="journey-title">
+        <div class="container">
+          <div class="section-header section-header-compact">
+            <h2 id="journey-title">How it works</h2>
+            <p>From estimate to edited manuscript in a few clear steps.</p>
+          </div>
+          <ol class="journey-steps">
+            <li>
+              <span class="journey-num">1</span>
+              <div>
+                <h3>Choose services</h3>
+                <p>Pick language editing and any add-ons your manuscript needs.</p>
+              </div>
+            </li>
+            <li>
+              <span class="journey-num">2</span>
+              <div>
+                <h3>Get an instant quote</h3>
+                <p>Enter word count and options — see a live price breakdown.</p>
+              </div>
+            </li>
+            <li>
+              <span class="journey-num">3</span>
+              <div>
+                <h3>Submit &amp; pay</h3>
+                <p>Upload your final file after payment confirmation to start editing.</p>
+              </div>
+            </li>
+            <li>
+              <span class="journey-num">4</span>
+              <div>
+                <h3>Receive &amp; revise</h3>
+                <p>Get your edited manuscript, with free re-editing on eligible tiers.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="services" class="section services-section">
+        <div class="container">
+          <div class="section-header section-header-with-action">
+            <div class="section-header-copy">
+              <h2>English Language Editing</h2>
+              <p>Professional, certified language editing delivered by English language experts.</p>
+            </div>
+            <a
+              class="resource-chip resource-chip-faq service-faq-chip"
+              href="faq/language-editing.html"
+              title="Language Editing FAQs: tiers, formats, and word count"
+            >
+              <span class="resource-chip-icon" aria-hidden="true">?</span>
+              FAQ
+            </a>
+          </div>
+
+          <div class="word-count-control" id="word-count-control">
+            <div class="word-count-control-header">
+              <div>
+                <p class="word-count-label">Estimate your price</p>
+                <p class="word-count-help">Upload a manuscript or choose a word-count band to compare tiers.</p>
+              </div>
+              <div class="word-count-readout" aria-live="polite">
+                <strong id="word-count-range">1,000 – 2,000 words</strong>
+                <span id="word-count-hint">Starting prices shown</span>
+              </div>
+            </div>
+
+            <div
+              class="manuscript-upload"
+              id="manuscript-upload"
+              tabindex="0"
+              role="button"
+              aria-controls="manuscript-file-input"
+            >
+              <input
+                type="file"
+                id="manuscript-file-input"
+                class="manuscript-file-input"
+                accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              />
+              <div class="manuscript-upload-body">
+                <p class="manuscript-upload-title">Upload manuscript (.doc / .docx)</p>
+                <p class="manuscript-upload-help">
+                  One upload reads the same file for word count and figure/table count.
+                  With Standard or Rapid, Figure &amp; Table Editing is optional (+10% off).
+                  With Academic, it is included.
+                </p>
+                <p class="manuscript-upload-status" id="manuscript-upload-status" aria-live="polite">
+                  Drag &amp; drop a file here, or <span class="manuscript-browse">browse</span>
+                </p>
+              </div>
+              <div id="manuscript-detection" class="manuscript-detection hidden" aria-live="polite">
+                <div class="detection-grid">
+                  <div class="detection-stat">
+                    <strong id="detect-words">0</strong>
+                    <span>Words</span>
+                  </div>
+                  <div class="detection-stat">
+                    <strong id="detect-figures">0</strong>
+                    <span>Figures</span>
+                  </div>
+                  <div class="detection-stat">
+                    <strong id="detect-tables">0</strong>
+                    <span>Tables</span>
+                  </div>
+                </div>
+                <div class="detection-figure-offer" id="detection-figure-offer">
+                  <div class="detection-figure-copy">
+                    <p class="detection-figure-title">
+                      Figure &amp; Table Editing
+                      <span class="detection-badge" id="detection-figure-badge">Optional with Standard / Rapid</span>
+                    </p>
+                    <p class="detection-figure-price" id="detection-figure-price">
+                      No figures or tables detected
+                    </p>
+                  </div>
+                  <label class="detection-include" id="detection-include-label">
+                    <input type="checkbox" id="include-detected-figures" />
+                    <span id="detection-include-text">Add with Standard / Rapid</span>
+                  </label>
+                  <p class="detection-included-note hidden" id="detection-included-note">
+                    Included with Academic
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="word-count-divider"><span>or choose a band</span></div>
+
+            <label class="word-count-slider-label" for="word-count-slider">
+              Word count
+              <input
+                type="range"
+                id="word-count-slider"
+                min="0"
+                max="7"
+                step="1"
+                value="0"
+                aria-valuetext="1,000 to 2,000 words"
+              />
+            </label>
+
+            <div class="word-count-bands" id="word-count-bands" role="group" aria-label="Word count bands"></div>
+          </div>
+
+          <div class="tier-grid">
+            <article class="tier-card" data-tier="standard">
+              <div class="tier-card-body">
+                <h3>Standard - 5 days</h3>
+                <p class="card-price" data-price-tier="standard">
+                  <span class="card-price-amount">CHF 77.00</span>
+                  <small class="card-price-caption">Starting from</small>
+                </p>
+                <p class="tier-tagline">Improve the English to make it clear, consistent, and grammatically correct.</p>
+                <ul class="check-list">
+                  <li>Clear, consistent, and correct language</li>
+                  <li>Consistent terminology</li>
+                  <li>Correct grammar</li>
+                  <li>Editing certificate</li>
+                  <li>10% discount on Figure and Table editing</li>
+                </ul>
+                <button class="btn btn-outline btn-block select-tier" data-tier="standard">Select Standard</button>
+              </div>
+            </article>
+
+            <article class="tier-card tier-featured" data-tier="rapid">
+              <div class="tier-banner">Most Popular</div>
+              <div class="tier-card-body">
+                <h3>Rapid - 1 day</h3>
+                <p class="card-price" data-price-tier="rapid">
+                  <span class="card-price-amount">CHF 112.00</span>
+                  <small class="card-price-caption">Starting from</small>
+                </p>
+                <p class="tier-tagline">Do you need your work edited now? The same high-quality and professional editing as Standard but much quicker.</p>
+                <ul class="check-list">
+                  <li>Clear, consistent, and correct language (All features of Standard)</li>
+                  <li>Unlimited free re-editing for 1 year</li>
+                  <li>Cover letter and reviewer response editing included</li>
+                  <li>Two experts dedicated to your project</li>
+                  <li>10% discount on Figure and Table editing</li>
+                </ul>
+                <button class="btn btn-primary btn-block select-tier" data-tier="rapid">Select Rapid</button>
+              </div>
+            </article>
+
+            <article class="tier-card tier-recommended" data-tier="academic">
+              <div class="tier-banner tier-banner-recommended">Recommended</div>
+              <div class="tier-card-body">
+                <h3>Academic - 5 days</h3>
+                <p class="card-price" data-price-tier="academic">
+                  <span class="card-price-amount">CHF 194.00</span>
+                  <small class="card-price-caption">Starting from</small>
+                </p>
+                <p class="tier-tagline">On top of language editing, a specialist editor will review the structure and subject-specific terminology of your manuscript.</p>
+                <ul class="check-list">
+                  <li>Clear, consistent, and correct language (All features of Standard)</li>
+                  <li>Unlimited free re-editing for 1 year</li>
+                  <li>Cover letter and reviewer response editing included</li>
+                  <li>Three experts dedicated to your project</li>
+                  <li>A second review by a PhD subject specialist</li>
+                  <li>Technical review report</li>
+                  <li>Figure &amp; Table editing included</li>
+                  <li>Layout editing included for MDPI journals</li>
+                </ul>
+                <button class="btn btn-outline btn-block select-tier" data-tier="academic">Select Academic</button>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section addon-section" id="additional-services">
+        <div class="container">
+          <div class="section-header">
+            <h2>Additional Services</h2>
+            <p>Optional add-ons you can order alone or with language editing.</p>
+          </div>
+          <div class="addon-grid">
+            <article class="addon-card" data-service="figures">
+              <h3>Figure &amp; Table Editing</h3>
+              <p class="addon-card-price">
+                <strong data-price-service="figures">CHF 50.00</strong>
+                <small>per figure</small>
+              </p>
+              <p>Publication-ready charts, graphs, and tables with revised colors, resolution, fonts, and file types.</p>
+              <span class="addon-meta">1 business day</span>
+              <div class="resource-toolstrip" role="group" aria-label="Figure editing resources">
+                <button type="button" class="resource-chip resource-chip-examples link-examples" data-example="figures">
+                  <span class="resource-chip-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="5.5" cy="6.2" r="1.2" fill="currentColor"/><path d="M1.8 11.5 5.8 8.2l2.4 2.1L12.2 6l2 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Examples
+                </button>
+                <a class="resource-chip resource-chip-faq" href="faq/figure-table-editing.html">
+                  <span class="resource-chip-icon" aria-hidden="true">?</span>
+                  FAQ
+                </a>
+              </div>
+            </article>
+            <article class="addon-card" data-service="graphical">
+              <h3>Graphical Abstract</h3>
+              <p class="addon-card-price">
+                <strong data-price-service="graphical">CHF 200.00</strong>
+                <small>per submission</small>
+              </p>
+              <p>Custom graphical abstracts that clearly communicate your research and meet journal requirements.</p>
+              <span class="addon-meta">5 working days</span>
+              <div class="resource-toolstrip" role="group" aria-label="Graphical abstract resources">
+                <button type="button" class="resource-chip resource-chip-examples link-examples" data-example="graphical">
+                  <span class="resource-chip-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="5.5" cy="6.2" r="1.2" fill="currentColor"/><path d="M1.8 11.5 5.8 8.2l2.4 2.1L12.2 6l2 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Examples
+                </button>
+                <a class="resource-chip resource-chip-faq" href="faq/graphical-abstract.html">
+                  <span class="resource-chip-icon" aria-hidden="true">?</span>
+                  FAQ
+                </a>
+              </div>
+            </article>
+            <article class="addon-card" data-service="layout">
+              <h3>Layout Editing</h3>
+              <p class="addon-card-price">
+                <strong data-price-service="layout">CHF 85.00</strong>
+                <small>per submission</small>
+              </p>
+              <p>MDPI house-style formatting, reference checks, and presentation improvements for journal submission.</p>
+              <span class="addon-meta">1 business day</span>
+              <div class="resource-toolstrip" role="group" aria-label="Layout editing resources">
+                <button type="button" class="resource-chip resource-chip-examples link-examples" data-example="layout">
+                  <span class="resource-chip-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="5.5" cy="6.2" r="1.2" fill="currentColor"/><path d="M1.8 11.5 5.8 8.2l2.4 2.1L12.2 6l2 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Examples
+                </button>
+                <a class="resource-chip resource-chip-faq" href="faq/layout-editing.html">
+                  <span class="resource-chip-icon" aria-hidden="true">?</span>
+                  FAQ
+                </a>
+              </div>
+            </article>
+            <article class="addon-card" data-service="video">
+              <h3>Video Production</h3>
+              <ul class="addon-price-list" data-price-service="video">
+                <li><span>Video Abstract</span><strong>CHF 600</strong></li>
+                <li><span>Short Take</span><strong>CHF 500</strong></li>
+                <li><span>Scholar Profile</span><strong>CHF 500</strong></li>
+                <li><span>Scholar Interview</span><strong>CHF 400</strong></li>
+              </ul>
+              <span class="addon-meta">The final video will be delivered within 15 working days of payment, excluding correspondence or revision delays.</span>
+              <a class="addon-primary-link" href="video-production.html">Learn more about Video Production →</a>
+              <div class="resource-toolstrip" role="group" aria-label="Video production resources">
+                <button type="button" class="resource-chip resource-chip-examples link-examples" data-example="video">
+                  <span class="resource-chip-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 3.5h8.5A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-1.5 1.5H2A1.5 1.5 0 0 1 .5 11V5A1.5 1.5 0 0 1 2 3.5Z" stroke="currentColor" stroke-width="1.3" transform="translate(1 0)"/><path d="M12 6.2 15 4.5v7l-3-1.7V6.2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
+                  Examples
+                </button>
+                <a class="resource-chip resource-chip-faq" href="faq/video-production.html">
+                  <span class="resource-chip-icon" aria-hidden="true">?</span>
+                  FAQ
+                </a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <div id="example-modal" class="example-modal hidden" role="dialog" aria-modal="true" aria-labelledby="example-modal-title">
+        <div class="example-modal-backdrop" data-close-modal></div>
+        <div class="example-modal-dialog">
+          <header class="example-modal-header">
+            <h3 id="example-modal-title">Service examples</h3>
+            <div class="example-modal-actions">
+              <button type="button" class="btn btn-outline btn-sm" id="example-zoom-out" aria-label="Zoom out">−</button>
+              <span id="example-zoom-label">100%</span>
+              <button type="button" class="btn btn-outline btn-sm" id="example-zoom-in" aria-label="Zoom in">+</button>
+              <button type="button" class="btn btn-outline btn-sm" id="example-zoom-reset">Reset</button>
+              <button type="button" class="example-modal-close" data-close-modal aria-label="Close">×</button>
+            </div>
+          </header>
+          <div class="example-modal-stage">
+            <button type="button" class="example-nav example-nav-prev hidden" id="example-prev" aria-label="Previous example">‹</button>
+            <div class="example-modal-canvas" id="example-modal-canvas">
+              <img id="example-modal-image" src="" alt="" draggable="false" />
+            </div>
+            <button type="button" class="example-nav example-nav-next hidden" id="example-next" aria-label="Next example">›</button>
+          </div>
+          <div class="example-modal-footer">
+            <p class="example-modal-hint">Scroll or use + / − to zoom. Drag to pan when zoomed in.</p>
+            <p class="example-modal-count hidden" id="example-count" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="video-example-modal" class="example-modal video-example-modal hidden" role="dialog" aria-modal="true" aria-labelledby="video-example-title">
+        <div class="example-modal-backdrop" data-close-video-modal></div>
+        <div class="example-modal-dialog video-example-dialog">
+          <header class="example-modal-header video-example-header">
+            <h3 id="video-example-title">Video Example</h3>
+            <button type="button" class="example-modal-close" data-close-video-modal aria-label="Close">×</button>
+          </header>
+          <div class="video-example-body">
+            <aside class="video-example-sidebar" id="video-example-sidebar" role="tablist" aria-label="Video service types"></aside>
+            <div class="video-example-content">
+              <p class="video-example-description" id="video-example-description"></p>
+              <div class="video-example-player" id="video-example-player">
+                <video
+                  id="video-example-video"
+                  controls
+                  playsinline
+                  preload="metadata"
+                  controlslist="nodownload"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="quote" class="section quote-section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Get a Quote</h2>
+            <p>Build your order and see a live estimate—no account required for this prototype.</p>
+          </div>
+
+          <ol class="quote-steps" aria-label="Quote steps">
+            <li class="is-active" data-quote-step="1"><span>1</span> Select services</li>
+            <li data-quote-step="2"><span>2</span> Configure quote</li>
+            <li data-quote-step="3"><span>3</span> Review &amp; checkout</li>
+          </ol>
+
+          <div class="quote-layout">
+            <form id="quote-form" class="quote-form" novalidate>
+              <fieldset class="form-group">
+                <legend><span class="legend-step">1</span> Selected service(s)</legend>
+                <p class="form-hint">Choose one or more — each service can be ordered alone.</p>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="service" value="language" checked />
+                  <span class="checkbox-card-body">
+                    <strong>Language Editing</strong>
+                    <small>Standard, Rapid, or Academic</small>
+                  </span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="service" value="figures" />
+                  <span class="checkbox-card-body">
+                    <strong>Figure &amp; Table Editing</strong>
+                  </span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="service" value="layout" />
+                  <span class="checkbox-card-body">
+                    <strong>Layout Editing</strong>
+                  </span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="service" value="graphical" />
+                  <span class="checkbox-card-body">
+                    <strong>Graphical Abstract</strong>
+                  </span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="service" value="video" />
+                  <span class="checkbox-card-body">
+                    <strong>Video Production</strong>
+                  </span>
+                </label>
+              </fieldset>
+
+              <p id="no-service-hint" class="no-service-hint">Select at least one service above to configure your order.</p>
+
+              <div id="panel-language" class="service-panel hidden" data-service="language">
+                <h4 class="service-panel-title"><span class="legend-step">2</span> Language Editing</h4>
+                <div class="form-field">
+                  <label for="tier">Editing Tier</label>
+                  <select id="tier" name="tier">
+                    <option value="standard">Standard — 5 days · from CHF 77</option>
+                    <option value="rapid" selected>Rapid — 1 day · from CHF 112</option>
+                    <option value="academic">Academic — 5 days · from CHF 194</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="words">Number of Words</label>
+                  <div class="words-field-row">
+                    <input type="number" id="words" name="words" min="1" step="1" value="1000" placeholder="e.g. 1000" />
+                    <label class="btn btn-outline btn-sm words-upload-btn" for="quote-manuscript-input">
+                      Upload .doc/.docx
+                    </label>
+                    <input
+                      type="file"
+                      id="quote-manuscript-input"
+                      class="manuscript-file-input"
+                      accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    />
+                  </div>
+                  <small id="words-upload-hint">
+                    Upload a Word file to detect words automatically, or enter the count manually.
+                    Author names, affiliations, and references should be excluded when possible.
+                  </small>
+                  <p class="language-figure-perk" id="language-figure-perk">
+                    With Standard or Rapid: <strong>10% off</strong> Figure &amp; Table Editing.
+                    With Academic: Figure &amp; Table Editing (when detected) and Layout Editing for MDPI journals are <strong>included</strong>.
+                  </p>
+                  <div class="academic-recommendation hidden" id="academic-recommendation" role="status">
+                    <div class="academic-recommendation-copy">
+                      <span class="recommendation-badge">Recommended</span>
+                      <strong>Academic may cost less for this manuscript</strong>
+                      <p id="academic-recommendation-text"></p>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm select-tier"
+                      id="select-recommended-academic"
+                      data-tier="academic"
+                    >
+                      Select Academic
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="included-services-grid">
+                <div id="panel-figures" class="service-panel hidden" data-service="figures">
+                  <h4 class="service-panel-title" id="figure-panel-title">Figure &amp; Table Editing</h4>
+                  <label class="figure-opt-in" id="figure-opt-in-row">
+                    <input type="checkbox" id="quote-include-figures" />
+                    <span id="figure-opt-in-text">
+                      Add Figure &amp; Table Editing
+                      <small id="figure-opt-summary">Optional with Standard / Rapid · 10% off with language editing</small>
+                    </span>
+                  </label>
+                  <div class="form-field hidden" id="figure-opt-fields">
+                    <label for="figures">Total Number of Figures and Tables</label>
+                    <input type="number" id="figures" name="figures" min="1" placeholder="e.g. 5" />
+                    <small id="figures-detection-hint" class="hidden"></small>
+                    <small id="figures-discount-hint" class="hidden">Discount applied based on your Language Editing tier</small>
+                  <small class="standalone-service-hint">Can be ordered independently without Language Editing.</small>
+                  </div>
+                </div>
+
+                <div id="panel-layout" class="service-panel hidden" data-service="layout">
+                  <h4 class="service-panel-title">Layout Editing</h4>
+                  <label class="figure-opt-in is-selective" id="layout-opt-in-row">
+                    <input type="checkbox" id="quote-include-layout" />
+                    <span id="layout-opt-in-text">
+                      Add Layout Editing
+                      <small>Optional with Standard / Rapid · CHF 85.00 per submission</small>
+                    </span>
+                  </label>
+                  <label class="figure-opt-in is-locked layout-selected-row hidden" id="layout-selected-row">
+                    <input type="checkbox" id="layout-included-check" checked disabled />
+                    <span>
+                      Layout Editing
+                      <small>Included with Academic for MDPI journals</small>
+                    </span>
+                  </label>
+                  <p class="layout-included-banner hidden" id="layout-included-banner">
+                    Included with Academic for MDPI journal submissions
+                  </p>
+                  <div class="form-field hidden" id="layout-opt-fields">
+                    <input type="hidden" id="journal" name="journal" value="" />
+                    <small class="standalone-service-hint">Journal name is collected during checkout.</small>
+                  </div>
+                </div>
+              </div>
+
+              <div id="panel-graphical" class="service-panel hidden" data-service="graphical">
+                <h4 class="service-panel-title">Graphical Abstract</h4>
+                <p class="form-hint">No additional configuration needed here. Material requirements are collected after you submit your order.</p>
+              </div>
+
+              <div id="panel-video" class="service-panel hidden" data-service="video">
+                <h4 class="service-panel-title">Video Production</h4>
+                <div class="form-field">
+                  <label for="video-type">Video <span class="required-mark" aria-hidden="true">*</span></label>
+                  <select id="video-type" name="videoType" required>
+                    <option value="abstract" selected>Video Abstract — CHF 600</option>
+                    <option value="short">Short Take — CHF 500</option>
+                    <option value="profile">Scholar Profile — CHF 500</option>
+                    <option value="interview">Scholar Interview — CHF 400</option>
+                  </select>
+                </div>
+                <p class="form-hint">Manuscript DOI, producer notes, and publishing options are collected during checkout.</p>
+              </div>
+
+              <div id="panel-ioap" class="service-panel hidden" data-service="ioap">
+                <h4 class="service-panel-title">Institutional Discount (IOAP)</h4>
+                <div class="form-field">
+                  <label for="email">Institutional Email</label>
+                  <input type="email" id="email" name="email" placeholder="you@university.edu" />
+                  <small>IOAP-eligible domains receive an automatic 15% discount on all selected services</small>
+                </div>
+                <div id="ioap-banner" class="ioap-banner hidden" role="status">
+                  <strong>IOAP discount applied!</strong> Your institutional email qualifies for 15% off all selected services.
+                </div>
+              </div>
+
+              <div class="form-field form-field-currency">
+                <label for="currency">Preferred Currency</label>
+                <select id="currency" name="currency">
+                  <option value="CHF">CHF</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </div>
+            </form>
+
+            <aside class="price-panel" aria-live="polite">
+              <div class="price-panel-head">
+                <h3>Your estimate</h3>
+                <p class="price-panel-sub" id="price-panel-sub">Select a service to begin</p>
+              </div>
+              <div class="video-campaign-note price-panel-campaign hidden" id="video-campaign-note" role="status">
+                <span class="video-campaign-discount">10% off</span>
+                <span>Use promo code <strong>VIDEO10</strong></span>
+                <span class="video-campaign-dates">Valid 1 July–30 December 2026</span>
+              </div>
+              <dl class="price-lines">
+                <div class="price-line" id="line-language">
+                  <dt>Language Editing</dt>
+                  <dd>—</dd>
+                </div>
+                <div class="price-line" id="line-figures">
+                  <dt>Figure &amp; Table Editing</dt>
+                  <dd>—</dd>
+                </div>
+                <div class="price-line" id="line-layout">
+                  <dt>Layout Editing</dt>
+                  <dd>—</dd>
+                </div>
+                <div class="price-line" id="line-graphical">
+                  <dt>Graphical Abstract</dt>
+                  <dd>—</dd>
+                </div>
+                <div class="price-line" id="line-video">
+                  <dt>Video Production</dt>
+                  <dd>—</dd>
+                </div>
+                <div class="price-line price-discount hidden" id="line-discount">
+                  <dt>IOAP Discount (15%)</dt>
+                  <dd>—</dd>
+                </div>
+              </dl>
+              <div class="price-total">
+                <span>Total Price</span>
+                <strong id="total-price">CHF 0.00</strong>
+              </div>
+              <div class="price-panel-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block"
+                  id="submit-order-btn"
+                >
+                  Submit Order
+                </button>
+              </div>
+              <p class="price-panel-note">
+                Continue to checkout to enter service details, billing information, and pay on this platform.
+              </p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section testimonials-section">
+        <div class="container">
+          <div class="section-header">
+            <h2>What Authors Say</h2>
+          </div>
+          <div class="testimonial-grid">
+            <blockquote class="testimonial">
+              <p>"MDPI provides an excellent service compared to any other previously used services. It delivers fast and high-quality results but at an affordable price."</p>
+              <footer>— Ardha Apriyanto, University of Potsdam</footer>
+            </blockquote>
+            <blockquote class="testimonial">
+              <p>"The Rapid service saved me during a tight revision deadline. The editor understood my field and the technical review was thorough."</p>
+              <footer>— Dr. Sarah Chen, ETH Zurich</footer>
+            </blockquote>
+            <blockquote class="testimonial">
+              <p>"Figure editing transformed our charts into publication-ready visuals. Highly recommend for multidisciplinary teams."</p>
+              <footer>— Prof. Marco Rossi, University of Bologna</footer>
+            </blockquote>
+          </div>
+        </div>
+      </section>
+
+      <section id="guarantee" class="section guarantee-section">
+        <div class="container guarantee-grid">
+          <article class="guarantee-card">
+            <p class="eyebrow">Our guarantee</p>
+            <h2>Expert editing, backed by a clear quality promise.</h2>
+            <div class="guarantee-copy">
+              <p>
+                MDPI Author Services editors are English language experts. Our team includes
+                PhD holders, postgraduates, and subject-matter specialists.
+              </p>
+              <p>
+                If your manuscript is rejected for publication due to the English after we
+                have edited it, we will re-edit it free of charge or issue a refund.
+              </p>
+              <p>
+                Questions about our quality guarantee?
+                <a href="mailto:authorservices@mdpi.com">Contact Author Services</a>.
+              </p>
+            </div>
+          </article>
+          <article class="ioap-card">
+            <p class="eyebrow">IOAP</p>
+            <h2>Institutional Open Access Program (IOAP) 15% Discount</h2>
+            <p>
+              We partner with more than 800 institutions via the Institutional Open Access
+              Program (IOAP) to offer a 15% discount on all Author Services.
+            </p>
+            <p class="ioap-hint">
+              Use your institutional email when submitting. Eligible domains are detected automatically.
+            </p>
+            <div class="ioap-discount-panel">
+              <div class="ioap-discount-amount">
+                <strong>15%</strong>
+                <span>IOAP Discount</span>
+              </div>
+              <div class="ioap-discount-details">
+                <p>Sign in with your institutional email during submission to check eligibility.</p>
+                <div class="ioap-institution-picker">
+                  <label for="ioap-institution-search">Check institution list</label>
+                  <div class="ioap-combobox">
+                    <input
+                      type="text"
+                      id="ioap-institution-search"
+                      placeholder="Search participating institutions…"
+                      autocomplete="off"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-expanded="false"
+                      aria-controls="ioap-institution-options"
+                    />
+                    <div
+                      id="ioap-institution-options"
+                      class="ioap-institution-menu hidden"
+                      role="listbox"
+                    ></div>
+                  </div>
+                  <small id="ioap-institution-status" role="status" aria-live="polite">
+                    Start typing an institution name.
+                  </small>
+                </div>
+                <div class="ioap-actions">
+                  <button class="btn btn-primary btn-sm" id="check-ioap-btn">
+                    Check with Email
+                  </button>
+                  <a
+                    class="ioap-list-link"
+                    href="https://www.mdpi.com/ioap#List_of_Participants_911"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Institutional Open Access Program ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="faqs" class="section faq-section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Frequently Asked Questions</h2>
+            <p>Browse answers by service to find the information you need.</p>
+          </div>
+          <div class="faq-preview-grid">
+            <a class="faq-preview-card" href="faq/language-editing.html">
+              <h3>Language Editing</h3>
+              <p>Tiers, formats, word count, and free re-editing</p>
+            </a>
+            <a class="faq-preview-card" href="faq/figure-table-editing.html">
+              <h3>Figures &amp; Tables</h3>
+              <p>What’s included, pricing, and turnaround</p>
+            </a>
+            <a class="faq-preview-card" href="faq/graphical-abstract.html">
+              <h3>Graphical Abstract</h3>
+              <p>Materials, delivery, and formats</p>
+            </a>
+            <a class="faq-preview-card" href="faq/layout-editing.html">
+              <h3>Layout Editing</h3>
+              <p>House style, Academic bundle, re-editing</p>
+            </a>
+            <a class="faq-preview-card" href="faq/video-production.html">
+              <h3>Video Production</h3>
+              <p>Video types, pricing, and delivery time</p>
+            </a>
+            <a class="faq-preview-card" href="faq/general.html">
+              <h3>General</h3>
+              <p>Discounts, payment, tracking, and guarantee</p>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-brand">
+          <img
+            class="logo-img"
+            src="assets/mdpi-authors-services-logo.svg"
+            alt="MDPI Author Services"
+            width="125"
+            height="32"
+          />
+        </div>
+        <p class="footer-note">Prototype — not affiliated with production MDPI systems.</p>
+        <div class="footer-links">
+          <a href="#top">Back to top</a>
+          <a href="faq/language-editing.html">FAQs</a>
+          <a href="video-production.html">Video Production</a>
+          <a href="mailto:authorservices@mdpi.com">authorservices@mdpi.com</a>
+        </div>
+      </div>
+    </footer>
+
+    <div id="toast" class="toast hidden" role="alert"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+    <script src="ioap-institutions.js?v=20260715a"></script>
+    <script src="app.js?v=20260716l"></script>
+  </body>
+</html>

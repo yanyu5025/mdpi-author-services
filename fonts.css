@@ -1,0 +1,44 @@
+@font-face {
+  font-family: "Suisse Intl";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("https://pub.mdpi-res.com/assets/fonts/anniversary25/SuisseIntl-Light.otf")
+    format("opentype");
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://pub.mdpi-res.com/assets/fonts/anniversary25/SuisseIntl-Regular.otf")
+    format("opentype");
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("https://pub.mdpi-res.com/assets/fonts/anniversary25/SuisseIntl-Medium.otf")
+    format("opentype");
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("https://pub.mdpi-res.com/assets/fonts/anniversary25/SuisseIntl-SemiBold.otf")
+    format("opentype");
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://pub.mdpi-res.com/assets/fonts/anniversary25/SuisseIntl-SemiBold.otf")
+    format("opentype");
+}
