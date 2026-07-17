@@ -1,3 +1,26 @@
+const MDPI_CONNECT_URL =
+  "https://www.figma.com/proto/FJTRlbOLVfbhF2b3NoezOX/MDPI-Connect?node-id=3412-8277&viewport=13665%2C-9872%2C0.64&t=vA1tgJ9ytFg4U40P-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3412%3A8277&show-proto-sidebar=1&page-id=3198%3A21033";
+
+const PAYMENT_METHODS = [
+  { id: "mastercard", type: "card" },
+  { id: "visa", type: "card" },
+  { id: "amex", type: "card" },
+  { id: "paypal", type: "wallet" },
+  { id: "unionpay", type: "card" },
+  { id: "alipay", type: "wallet" },
+  { id: "wechat", type: "wallet" },
+];
+
+const CARD_METHODS = new Set(["mastercard", "visa", "amex", "unionpay"]);
+
+function t(key) {
+  return window.MdpiI18n?.t(key) ?? key;
+}
+
+function externalLinkIcon() {
+  return `<svg class="icon-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+}
+
 /**
  * On-platform checkout wizard — reads quote payload from sessionStorage.
  */
@@ -77,7 +100,17 @@ function saveOrder() {
 }
 
 function formatMoney(amount, currency = "CHF") {
+  if (window.MdpiMoney?.formatMoney) {
+    return window.MdpiMoney.formatMoney(amount, currency);
+  }
   return `${currency} ${Number(amount).toFixed(2)}`;
+}
+
+function formatMoneyAmount(amount, currency = "CHF") {
+  if (window.MdpiMoney?.formatMoneyAmount) {
+    return window.MdpiMoney.formatMoneyAmount(amount, currency);
+  }
+  return Number(amount).toFixed(2);
 }
 
 function escapeHtml(value) {
@@ -234,10 +267,10 @@ const STEP_META = {
     title: "Review your order",
     desc: "Confirm your services and billing details before payment.",
   },
-  payment: {
+    payment: {
     eyebrow: "Step 4 of 4",
-    title: "Payment by credit card",
-    desc: "Pay securely to complete your order. Work begins once payment is received.",
+    title: "Payment",
+    desc: "Choose your preferred payment method and pay securely to complete your order.",
   },
 };
 
@@ -260,7 +293,7 @@ function renderSidebarSummary(options = {}) {
     summaryHtml = renderFeesSummary();
   } else {
     summaryHtml = renderLineItems();
-    summaryHtml += `<div class="checkout-summary-row is-total"><dt>Subtotal</dt><dd>${formatMoney(pricing.total, currency)}</dd></div>`;
+    summaryHtml += `<div class="checkout-summary-row is-total"><dt>${t("subtotal")}</dt><dd>${formatMoney(pricing.total, currency)}</dd></div>`;
   }
 
   let invoiceBlock = "";
@@ -273,9 +306,13 @@ function renderSidebarSummary(options = {}) {
   }
 
   return `
+    <a href="${MDPI_CONNECT_URL}" class="checkout-submission-history" target="_blank" rel="noopener noreferrer">
+      ${t("submissionHistory")}
+      ${externalLinkIcon()}
+    </a>
     <div class="checkout-sidebar-card">
       <div class="checkout-sidebar-head">
-        <h2>Order summary</h2>
+        <h2>${t("orderSummary")}</h2>
         <p>${order.services.length} service${order.services.length === 1 ? "" : "s"} · <span class="checkout-sidebar-currency">${currency}</span></p>
       </div>
       ${invoiceBlock}
@@ -402,10 +439,10 @@ function renderProgress() {
   if (!list) return;
   const current = stepIndex(checkoutStep);
   const labels = {
-    details: "Details",
-    invoice: "Invoice Information",
-    review: "Review",
-    payment: "Payment",
+    details: t("stepDetails"),
+    invoice: t("stepInvoice"),
+    review: t("stepReview"),
+    payment: t("stepPayment"),
     confirmation: "Confirmation",
   };
   list.innerHTML = CHECKOUT_STEPS.filter((s) => s !== "confirmation")
@@ -465,6 +502,13 @@ function renderLineItems() {
       return `<div class="checkout-summary-row${row.isDiscount ? " is-discount" : ""}"><dt>${escapeHtml(row.label)}</dt><dd>${value}</dd></div>`;
     })
     .join("");
+}
+
+function renderCountrySelect(selected = "") {
+  if (window.MdpiCountries?.renderCountryOptions) {
+    return `<select id="invoice-country" autocomplete="country-name">${window.MdpiCountries.renderCountryOptions(selected)}</select>`;
+  }
+  return `<select id="invoice-country" autocomplete="country-name"><option value="">Select country</option></select>`;
 }
 
 function renderFeesSummary() {
@@ -638,14 +682,7 @@ function renderInvoiceStep() {
         </div>
         <div class="form-field form-field-full">
           <label for="invoice-country">Country / Territory <span class="required-mark">*</span></label>
-          <select id="invoice-country" autocomplete="country-name">
-            <option value="">Select country</option>
-            <option value="Switzerland"${inv.invoiceCountry === "Switzerland" ? " selected" : ""}>Switzerland</option>
-            <option value="Germany"${inv.invoiceCountry === "Germany" ? " selected" : ""}>Germany</option>
-            <option value="United Kingdom"${inv.invoiceCountry === "United Kingdom" ? " selected" : ""}>United Kingdom</option>
-            <option value="United States"${inv.invoiceCountry === "United States" ? " selected" : ""}>United States</option>
-            <option value="China"${inv.invoiceCountry === "China" ? " selected" : ""}>China</option>
-          </select>
+          ${renderCountrySelect(inv.invoiceCountry)}
         </div>
       </div>
     </section>
@@ -690,12 +727,43 @@ function renderReviewStep() {
   });
 }
 
+function renderPaymentMethods() {
+  const selected = order.paymentMethod || "mastercard";
+  return `
+    <fieldset class="checkout-payment-methods">
+      <legend>${t("paymentMethod")}</legend>
+      <div class="payment-method-grid">
+        ${PAYMENT_METHODS.map(
+          (method) => `
+          <label class="payment-method-option${selected === method.id ? " is-selected" : ""}">
+            <input type="radio" name="payment-method" value="${method.id}"${selected === method.id ? " checked" : ""} />
+            <span class="payment-method-label">${t(`paymentMethods.${method.id}`)}</span>
+          </label>`
+        ).join("")}
+      </div>
+    </fieldset>`;
+}
+
+function renderWalletPaymentContent(method) {
+  if (method === "alipay" || method === "wechat") {
+    const qrSrc = method === "alipay" ? "assets/qr-alipay-test.svg" : "assets/qr-wechat-test.svg";
+    return `
+      <div class="checkout-qr-payment">
+        <img src="${qrSrc}" alt="" width="220" height="220" class="checkout-qr-image" />
+        <p class="checkout-qr-caption">${t("scanToPay")} ${t(`paymentMethods.${method}`)}</p>
+        <p class="form-hint">${t("qrTestHint")}</p>
+      </div>`;
+  }
+  return `<p class="form-hint">${t("walletRedirectHint").replace("{method}", t(`paymentMethods.${method}`))}</p>`;
+}
+
 function renderPaymentStep() {
   const { currency } = order;
   const { total } = getFees();
-  const fx = currency === "USD" ? total * 1.12 : total;
-  const displayCurrency = currency === "USD" ? "USD" : currency;
-  const displayTotal = currency === "USD" ? fx : total;
+  const displayTotal = formatMoneyAmount(total, currency);
+  const selectedMethod = order.paymentMethod || "mastercard";
+  const isCard = CARD_METHODS.has(selectedMethod);
+  const isQrWallet = selectedMethod === "alipay" || selectedMethod === "wechat";
 
   const body = `
     ${renderStepHeader("payment")}
@@ -703,22 +771,17 @@ function renderPaymentStep() {
     <div class="checkout-payment-amount-card">
       <dl>
         <dt>Amount due</dt>
-        <dd>${displayTotal.toFixed(2)} ${displayCurrency}</dd>
+        <dd>${formatMoney(total, currency)}</dd>
       </dl>
-      <div class="checkout-card-brands" aria-hidden="true">
-        <span class="checkout-card-brand">VISA</span>
-        <span class="checkout-card-brand">Mastercard</span>
-        <span class="checkout-card-brand">Amex</span>
-        <span class="checkout-card-brand">UnionPay</span>
-      </div>
     </div>
+    ${renderPaymentMethods()}
     <div class="checkout-payment-box">
       <h2>Transfer information</h2>
       <dl class="checkout-payment-meta">
         <dt>Invoice ID</dt>
         <dd>${escapeHtml(invoiceId || order.invoiceId)}</dd>
         <dt>Currency</dt>
-        <dd>${displayCurrency}</dd>
+        <dd>${currency}</dd>
       </dl>
       <label class="checkout-terms">
         <input type="checkbox" id="payment-agree-terms" />
@@ -727,9 +790,11 @@ function renderPaymentStep() {
       <button type="button" class="btn btn-primary btn-block" id="proceed-payment-btn">Proceed to payment</button>
     </div>
     <div id="stripe-panel" class="checkout-stripe-mock checkout-hidden">
-      <h3>Enter card details</h3>
+      <h3>${isCard ? "Enter card details" : isQrWallet ? t("scanToPay") + " " + t(`paymentMethods.${selectedMethod}`) : `Continue with ${t(`paymentMethods.${selectedMethod}`)}`}</h3>
       <p class="form-hint">Your payment is encrypted and processed securely.</p>
-      <div class="checkout-grid-2">
+      ${
+        isCard
+          ? `<div class="checkout-grid-2">
         <div class="form-field form-field-full">
           <label for="pay-email">Email</label>
           <input type="email" id="pay-email" value="${escapeHtml(order.invoice?.invoiceEmail || order.email)}" placeholder="email@example.com" autocomplete="email" />
@@ -750,11 +815,13 @@ function renderPaymentStep() {
           <label for="pay-name">Name on card</label>
           <input type="text" id="pay-name" placeholder="Full name on card" autocomplete="cc-name" value="${escapeHtml(`${order.invoice?.invoiceFirstName || ""} ${order.invoice?.invoiceLastName || ""}`.trim())}" />
         </div>
-      </div>
+      </div>`
+          : renderWalletPaymentContent(selectedMethod)
+      }
       <div class="checkout-actions">
         <button type="button" class="btn btn-outline" data-checkout-back="review">← Back to review</button>
         <div class="checkout-actions-end">
-          <button type="button" class="btn btn-primary" id="complete-payment-btn">Pay ${displayCurrency} ${displayTotal.toFixed(2)}</button>
+          <button type="button" class="btn btn-primary" id="complete-payment-btn">Pay ${currency} ${displayTotal}</button>
         </div>
       </div>
     </div>`;
@@ -762,7 +829,7 @@ function renderPaymentStep() {
   return wrapCheckoutLayout("payment", body, {
     showVat: true,
     showInvoiceId: true,
-    note: "Click Proceed to payment to open the secure card form.",
+    note: "Select your preferred payment method, then proceed.",
   });
 }
 
@@ -851,6 +918,18 @@ function bindCheckoutEvents() {
     document.getElementById("proceed-payment-btn")?.classList.add("checkout-hidden");
   });
 
+  document.querySelectorAll('input[name="payment-method"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      order.paymentMethod = input.value;
+      saveOrder();
+      if (checkoutStep === "payment") {
+        renderCheckout();
+        document.getElementById("stripe-panel")?.classList.add("checkout-hidden");
+        document.getElementById("proceed-payment-btn")?.classList.remove("checkout-hidden");
+      }
+    });
+  });
+
   document.getElementById("complete-payment-btn")?.addEventListener("click", () => {
     order.status = "paid";
     order.paidAt = new Date().toISOString();
@@ -874,5 +953,9 @@ function initCheckout() {
   }
   renderCheckout();
 }
+
+window.addEventListener("mdpi-language-change", () => {
+  if (order) renderCheckout();
+});
 
 initCheckout();

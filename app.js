@@ -87,11 +87,17 @@ function getLanguagePrice(words, tier) {
   return band[tier] ?? 0;
 }
 
-const FX = {
+const FX = window.MdpiMoney?.FX ?? {
   CHF: 1,
   EUR: 0.95,
   USD: 1.12,
   GBP: 0.88,
+  CNY: 8.15,
+  THB: 39.5,
+  JPY: 175,
+  KRW: 1520,
+  TRY: 36.5,
+  SAR: 4.2,
 };
 
 const FIGURE_DISCOUNT = {
@@ -945,10 +951,11 @@ function initManuscriptUpload() {
 }
 
 function renderAddonPrices() {
+  const currency = form?.currency?.value || "CHF";
   const servicePrices = {
-    figures: `CHF ${RATES.figures.perUnit.toFixed(2)}`,
-    layout: `CHF ${RATES.layout.flat.toFixed(2)}`,
-    graphical: `CHF ${RATES.graphical.flat.toFixed(2)}`,
+    figures: formatMoney(RATES.figures.perUnit, currency),
+    layout: formatMoney(RATES.layout.flat, currency),
+    graphical: formatMoney(RATES.graphical.flat, currency),
   };
 
   document.querySelectorAll("[data-price-service]").forEach((el) => {
@@ -978,23 +985,17 @@ function updateVideoTypeOptions() {
 }
 
 function renderVideoCampaignPrices() {
-  const campaignActive = isVideoCampaignActive();
   document.querySelectorAll("[data-video-type-price]").forEach((el) => {
     const type = el.dataset.videoTypePrice;
     const base = RATES.video[type];
     if (!base) return;
-    if (!campaignActive) {
-      el.textContent = `CHF ${base}`;
-      return;
-    }
-    const discounted = getVideoPrice(type);
-    el.innerHTML = `CHF ${formatVideoListPrice(discounted)} <small>10% off</small>`;
+    el.textContent = `CHF ${base}`;
   });
 
   const note = document.getElementById("video-campaign-note");
   if (note) {
     const showInEstimate =
-      campaignActive && !!document.querySelector('input[name="service"][value="video"]:checked');
+      isVideoCampaignActive() && !!document.querySelector('input[name="service"][value="video"]:checked');
     note.classList.toggle("hidden", !showInEstimate);
   }
 }
@@ -1313,6 +1314,9 @@ function initVideoExampleModal() {
 }
 
 function formatMoney(amount, currency) {
+  if (window.MdpiMoney?.formatMoney) {
+    return window.MdpiMoney.formatMoney(amount, currency);
+  }
   const converted = amount * (FX[currency] ?? 1);
   return `${currency} ${converted.toFixed(2)}`;
 }
@@ -2222,6 +2226,16 @@ if (form) {
   renderAddonPrices();
   updateVideoTypeOptions();
   renderVideoCampaignPrices();
+
+  form.currency?.addEventListener("change", () => {
+    renderAddonPrices();
+    calculateQuote();
+  });
+
+  window.addEventListener("mdpi-language-change", () => {
+    syncFormState();
+    calculateQuote();
+  });
 }
 
 initExampleModal();

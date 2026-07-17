@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout | MDPI Author Services</title>
     <link rel="stylesheet" href="fonts.css?v=20260716b" />
-    <link rel="stylesheet" href="styles.css?v=20260716b" />
+    <link rel="stylesheet" href="styles.css?v=20260717a" />
     <link rel="stylesheet" href="ux-enhance.css?v=20260716b" />
-    <link rel="stylesheet" href="checkout.css?v=20260716k" />
+    <link rel="stylesheet" href="checkout.css?v=20260717e" />
   </head>
   <body class="checkout-page">
-    <a href="#checkout-main" class="skip-link">Skip to checkout content</a>
+    <a href="#checkout-main" class="skip-link" data-i18n="skipToContent">Skip to checkout content</a>
     <header class="checkout-header">
       <div class="container checkout-header-inner">
         <a href="index.html" class="logo">
@@ -18,11 +18,20 @@
             class="logo-img"
             src="assets/mdpi-authors-services-logo.svg"
             alt="MDPI Author Services"
-            width="125"
+            width="180"
             height="32"
           />
         </a>
-        <a href="index.html#quote" class="checkout-back-link">← Edit quote</a>
+        <div class="checkout-header-actions">
+          <div class="lang-selector">
+            <label class="visually-hidden" for="checkout-lang" data-i18n="langLabel">Language</label>
+            <select id="checkout-lang" aria-label="Language">
+              <option value="en">English</option>
+              <option value="zh">中文</option>
+            </select>
+          </div>
+          <a href="index.html#quote" class="checkout-back-link" data-i18n="checkoutEditQuote">← Edit quote</a>
+        </div>
       </div>
     </header>
 
@@ -47,7 +56,7 @@
             class="logo-img"
             src="assets/mdpi-authors-services-logo.svg"
             alt="MDPI Author Services"
-            width="125"
+            width="180"
             height="32"
           />
         </div>
@@ -55,6 +64,9 @@
       </div>
     </footer>
 
-    <script src="checkout.js?v=20260716m"></script>
+    <script src="countries.js?v=20260717e"></script>
+    <script src="money.js?v=20260717c"></script>
+    <script src="i18n.js?v=20260717c"></script>
+    <script src="checkout.js?v=20260717e"></script>
   </body>
 </html>

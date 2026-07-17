@@ -125,20 +125,56 @@ TOPICS = [
         "slug": "video-production.html",
         "tab": "Video Production",
         "title": "Video Production FAQs",
-        "description": "Video Abstract, Short Take, Scholar Profile, and Scholar Interview options, pricing, and delivery.",
+        "description": "Video types, pricing, production timeline, discounts, revisions, and ordering for MDPI Academic Video Service.",
         "home_anchor": "../video-production.html",
         "items": [
             (
                 "What video types do you offer?",
-                "Video Abstract, Short Take, Scholar Profile, and Scholar Interview—designed to increase the visibility and accessibility of your research.",
-            ),
-            (
-                "How long does video production take?",
-                "The final video is delivered within 15 working days of payment, excluding correspondence or revision delays.",
+                "We offer four formats: <strong>Video Abstract</strong> (up to 5 minutes, summarizing your paper’s purpose, methods, and key findings), <strong>Short Take</strong> (up to 2 minutes, focused animation on one research idea or result), <strong>Scholar Profile</strong> (2–3 minutes introducing your academic background and research interests), and <strong>Scholar Interview</strong> (a guided conversation exploring your research and expert perspective).",
             ),
             (
                 "How much do video services cost?",
-                "Prices are per submission: Video Abstract CHF 600, Short Take CHF 500, Scholar Profile CHF 500, and Scholar Interview CHF 400 (prototype rates matching the live site examples).",
+                "Prices are per submission: Video Abstract CHF 600, Short Take CHF 500, Scholar Profile CHF 500, and Scholar Interview CHF 400. Promotional codes such as VIDEO10 may apply at checkout when eligible.",
+            ),
+            (
+                "What is the relationship between Encyclopedia and MDPI?",
+                "Encyclopedia MDPI is a user-generated content platform affiliated with MDPI. MDPI established Encyclopedia in 2018 to promote knowledge-sharing and open access to science. Accounts registered with MDPI can also be used on Encyclopedia.",
+            ),
+            (
+                "What should I do after placing an order?",
+                "Monitor your email for payment instructions from MDPI and Encyclopedia. Once payment is confirmed, we provide a comprehensive service—you review the final product while we handle production. If you prefer to track each step, we are happy to involve you throughout the process.",
+            ),
+            (
+                "How long will it take to produce a video?",
+                "Videos are completed within <strong>15 working days</strong> of payment, excluding delays caused by correspondence, feedback, or revision rounds. We will contact you shortly after payment is received to begin script writing.",
+            ),
+            (
+                "How can these videos promote my publications? Is a publication required?",
+                "Our videos will be released on Encyclopedia, where they will include links to the original publication, making it easy for viewers to access the full article. Additionally, we will promote the video across social media platforms, including Facebook, Twitter, LinkedIn, and YouTube. If the original paper is published by MDPI, the video will also be featured on the article’s page. A publication is not required to create a video. You can order a video based on concepts or ideas alone.",
+            ),
+            (
+                "What should I do if the video production process has not begun after payment?",
+                "We will contact you within 24 hours of receiving your payment during business days. If you do not hear from us within this period, please do not hesitate to contact <a href=\"mailto:office@encyclopedia.pub\">office@encyclopedia.pub</a>.",
+            ),
+            (
+                "What discounts are available?",
+                "<p>MDPI reviewer vouchers and video production vouchers can be used. If you have a voucher code, this may be entered when placing your Academic Video Service order. You can check your available vouchers at <a href=\"https://susy.mdpi.com/user/discount_voucher\" target=\"_blank\" rel=\"noopener\">susy.mdpi.com/user/discount_voucher</a>. The following criteria apply:</p><ul><li>One voucher may be used per submission.</li><li>MDPI reviewer vouchers can only be used by the voucher owner, while video production vouchers have no user restriction.</li></ul>",
+            ),
+            (
+                "What should I do if I am not satisfied with my video?",
+                "We typically offer at least three rounds of revisions for each video after your review. You can request revisions at any time within six months of the completed order.",
+            ),
+            (
+                "What should I do if I make a wrong order or fill in the wrong information for the invoice?",
+                "If you need to cancel an order or revise the invoice after payment, please contact us at <a href=\"mailto:office@encyclopedia.pub\">office@encyclopedia.pub</a>. Please note that once the video production process has begun, cancellations are no longer permitted.",
+            ),
+            (
+                "Do you offer services for companies, institutions, or journals seeking long-term collaboration?",
+                "Yes. We support institutional and long-term partnerships. Organizations interested in ongoing collaboration or multi-video projects may contact <a href=\"mailto:office@encyclopedia.pub\">office@encyclopedia.pub</a> for more information.",
+            ),
+            (
+                "What can I do if I have other questions?",
+                "Please contact <a href=\"mailto:office@encyclopedia.pub\">office@encyclopedia.pub</a>.",
             ),
         ],
     },
@@ -191,10 +227,11 @@ def faq_items_html(items, open_first=False):
     parts = []
     for i, (q, a) in enumerate(items):
         op = " open" if open_first and i == 0 else ""
+        body = a if a.strip().startswith("<") else f"<p>{a}</p>"
         parts.append(
             f"""              <details class="faq-item"{op}>
                 <summary>{q}</summary>
-                <p>{a}</p>
+                <div class="faq-item-body">{body}</div>
               </details>"""
         )
     return "\n".join(parts)
@@ -262,7 +299,10 @@ def footer():
 
 
 def plain(a):
-    return a.replace("<strong>", "").replace("</strong>", "")
+    import re
+    text = re.sub(r"<[^>]+>", " ", a)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
 
 def json_ld(topic):
@@ -297,8 +337,8 @@ def topic_page(topic):
     <meta name="description" content="{H.escape(topic["description"])}" />
     <link rel="canonical" href="{topic["slug"]}" />
     <link rel="stylesheet" href="../fonts.css?v=20260716b" />
-    <link rel="stylesheet" href="../styles.css?v=20260716b" />
-    <link rel="stylesheet" href="../ux-enhance.css?v=20260716b" />
+    <link rel="stylesheet" href="../styles.css?v=20260717e" />
+    <link rel="stylesheet" href="../ux-enhance.css?v=20260717e" />
     <script type="application/ld+json">
 {json_ld(topic)}
     </script>

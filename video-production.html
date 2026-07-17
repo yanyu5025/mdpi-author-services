@@ -10,11 +10,11 @@
     />
     <link rel="canonical" href="video-production.html" />
     <link rel="stylesheet" href="fonts.css?v=20260716b" />
-    <link rel="stylesheet" href="styles.css?v=20260716b" />
-    <link rel="stylesheet" href="ux-enhance.css?v=20260716b" />
+    <link rel="stylesheet" href="styles.css?v=20260717c" />
+    <link rel="stylesheet" href="ux-enhance.css?v=20260717e" />
   </head>
   <body class="service-page video-service-page subpage-chrome">
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to content</a>
     <header class="site-header faq-site-header">
       <div class="container header-inner">
         <a href="index.html" class="logo" title="Back to Author Services">
@@ -22,18 +22,27 @@
             class="logo-img"
             src="assets/mdpi-authors-services-logo.svg"
             alt="MDPI Author Services"
-            width="125"
+            width="180"
             height="32"
           />
         </a>
-        <a href="index.html#quote" class="btn btn-primary btn-sm">Get a Quote</a>
+        <div class="header-actions">
+          <div class="lang-selector">
+            <label class="visually-hidden" for="video-lang" data-i18n="langLabel">Language</label>
+            <select id="video-lang" aria-label="Language">
+              <option value="en">English</option>
+              <option value="zh">中文</option>
+            </select>
+          </div>
+          <a href="index.html#quote" class="btn btn-primary btn-sm header-cta" data-i18n="headerCta">Get a Quote</a>
+        </div>
       </div>
     </header>
     <div class="faq-back-bar">
       <div class="container faq-back-bar-inner">
         <a class="faq-back-link" href="index.html">
           <span class="faq-back-arrow" aria-hidden="true">←</span>
-          Back to Author Services
+          <span data-i18n="backToServices">Back to Author Services</span>
         </a>
         <nav class="faq-back-secondary" aria-label="Page sections">
           <a href="#use-cases">Use Cases</a>
@@ -45,10 +54,10 @@
 
     <main id="main">
       <section class="section service-hero-section">
-        <div class="container">
-          <p class="eyebrow">Academic Video Service</p>
-          <h1>Video Production</h1>
-          <p class="service-hero-lead">
+        <div class="container service-hero-copy">
+          <p class="eyebrow" data-i18n="videoHeroEyebrow">Academic Video Service</p>
+          <h1 data-i18n="videoHeroTitle">Video Production</h1>
+          <p class="service-hero-lead" data-i18n="videoHeroLead">
             Turn your publication into a professionally scripted academic video for journal pages,
             presentations, teaching, and social media.
           </p>
@@ -128,11 +137,11 @@
           <div class="section-header video-section-header-row">
             <div>
               <p class="eyebrow">Choose the right format</p>
-              <h2>Video types and pricing</h2>
-              <p>Compare formats by purpose and select the best way to present your research.</p>
+              <h2 data-i18n="videoTypesTitle">Video types and pricing</h2>
+              <p data-i18n="videoTypesLead">Compare formats by purpose and select the best way to present your research.</p>
             </div>
             <button type="button" class="btn btn-outline link-examples" data-example="video">
-              <span aria-hidden="true">▶</span> View Examples
+              <span aria-hidden="true">▶</span> <span data-i18n="viewExamples">View Examples</span>
             </button>
           </div>
           <div class="video-pricing-grid">
@@ -307,7 +316,7 @@
             height="32"
           />
         </div>
-        <p class="footer-note">Prototype — not affiliated with production MDPI systems.</p>
+        <p class="footer-note" data-i18n="footerNote">Prototype — not affiliated with production MDPI systems.</p>
         <div class="footer-links">
           <a href="index.html">Author Services</a>
           <a href="faq/language-editing.html">FAQs</a>
@@ -341,6 +350,7 @@
     </div>
 
     <div id="toast" class="toast hidden" role="alert"></div>
-    <script src="app.js?v=20260716e"></script>
+    <script src="i18n.js?v=20260717c"></script>
+    <script src="app.js?v=20260717c"></script>
   </body>
 </html>
