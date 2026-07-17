@@ -45,6 +45,10 @@ html {
   box-shadow: var(--focus-ring);
 }
 
+.menu-toggle:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
 /* Brand-unify price/tier accents (was competing blue) */
 .word-count-readout strong,
 .card-price-amount.is-updating {
@@ -328,7 +332,8 @@ html {
   margin-bottom: 1rem;
 }
 
-.price-panel-head h3 {
+.price-panel-head h3,
+.price-panel-head h4 {
   margin: 0 0 0.2rem;
 }
 
@@ -346,12 +351,14 @@ html {
   line-height: 1.4;
 }
 
-.price-line {
+.price-lines > dt.price-line,
+.price-lines > dd.price-line {
   opacity: 0.45;
   transition: opacity 0.2s;
 }
 
-.price-line.is-active {
+.price-lines > dt.price-line.is-active,
+.price-lines > dd.price-line.is-active {
   opacity: 1;
 }
 
@@ -362,6 +369,177 @@ html {
 /* Addon cards */
 .addon-card {
   position: relative;
+}
+
+/* ——— Service sections: typography & spacing ——— */
+.services-section .section-header-with-action {
+  margin-bottom: 2.25rem;
+}
+
+.services-section .section-header-copy p,
+.addon-section .section-header p {
+  font-size: 1rem;
+  line-height: 1.55;
+  max-width: 38ch;
+}
+
+.addon-section .section-header {
+  margin-bottom: 2.25rem;
+}
+
+.services-section .word-count-control {
+  padding: 1.5rem 1.75rem 1.45rem;
+  margin-bottom: 2rem;
+}
+
+.services-section .word-count-control-header {
+  margin-bottom: 1.15rem;
+}
+
+.services-section .word-count-label {
+  font-size: 1.0625rem;
+  letter-spacing: -0.015em;
+}
+
+.services-section .word-count-help {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.services-section .manuscript-upload {
+  margin-bottom: 1rem;
+}
+
+.services-section .manuscript-upload-help {
+  margin-bottom: 0.65rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  max-width: 48ch;
+}
+
+.services-section .tier-grid {
+  gap: 1.5rem;
+}
+
+.service-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.service-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.6rem;
+  background: rgba(0, 85, 195, 0.08);
+  color: var(--mdpi-green);
+}
+
+.service-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.service-card-titles {
+  min-width: 0;
+}
+
+.service-card-titles h3,
+.addon-card .service-card-head h3 {
+  margin: 0;
+}
+
+.tier-card .service-card-titles h3 {
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.tier-turnaround {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tier-card .card-price {
+  margin-bottom: 0.95rem;
+}
+
+.tier-card .card-price-amount {
+  letter-spacing: -0.025em;
+}
+
+.tier-card .check-list {
+  margin-bottom: 1.1rem;
+}
+
+.tier-card .check-list li,
+.addon-card > p {
+  line-height: 1.45;
+}
+
+.tier-card .check-list li {
+  margin-bottom: 0.32rem;
+  padding-left: 1.35rem;
+}
+
+.tier-card-body {
+  padding: 1.4rem 1.35rem 1.3rem;
+}
+
+.addon-grid {
+  gap: 1.35rem;
+}
+
+.addon-card {
+  padding: 1.35rem 1.3rem 1.25rem;
+}
+
+.addon-card .service-card-head {
+  margin-bottom: 0.55rem;
+}
+
+.addon-card .service-card-head h3 {
+  font-size: 1.02rem;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  align-self: center;
+}
+
+.addon-card-price {
+  margin-bottom: 0.5rem;
+}
+
+.addon-card > p {
+  margin-bottom: 0.65rem;
+  font-size: 0.8125rem;
+}
+
+.addon-meta {
+  margin-bottom: 0.65rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.addon-price-list {
+  margin-bottom: 0.55rem;
+  gap: 0.22rem;
+}
+
+.addon-primary-link {
+  margin-top: 0.15rem;
+  margin-bottom: 0.7rem;
+  font-size: 0.84rem;
 }
 
 /* FAQ preview */
@@ -1773,18 +1951,22 @@ html {
 }
 
 .guarantee-section .guarantee-card h2,
-.guarantee-section .ioap-card h2 {
+.guarantee-section .guarantee-card h3,
+.guarantee-section .ioap-card h2,
+.guarantee-section .ioap-card h3 {
   margin: 0 0 1rem;
   font-size: clamp(1.65rem, 3.2vw, 2.35rem);
   line-height: 1.08;
   letter-spacing: -0.035em;
 }
 
-.guarantee-section .guarantee-card h2 {
+.guarantee-section .guarantee-card h2,
+.guarantee-section .guarantee-card h3 {
   color: var(--white);
 }
 
-.guarantee-section .ioap-card h2 {
+.guarantee-section .ioap-card h2,
+.guarantee-section .ioap-card h3 {
   max-width: 25ch;
   color: var(--as-navy);
   font-size: clamp(1.45rem, 2.5vw, 1.9rem);
@@ -1809,6 +1991,18 @@ html {
 
 .guarantee-copy p:last-child {
   margin-bottom: 0;
+}
+
+.guarantee-section .guarantee-copy .guarantee-list {
+  margin: 0.65rem 0 0.85rem;
+  padding-left: 1.2rem;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.guarantee-section .guarantee-copy .guarantee-list li + li {
+  margin-top: 0.35rem;
 }
 
 .guarantee-section .guarantee-copy a,

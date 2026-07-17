@@ -522,6 +522,22 @@ a:hover {
   color: var(--text-muted);
 }
 
+.compact-list {
+  margin: 0 0 0.55rem;
+  padding-left: 1.15rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.compact-list li + li {
+  margin-top: 0.2rem;
+}
+
+.guarantee-copy .compact-list {
+  margin: 0.5rem 0 0.75rem;
+}
+
 .manuscript-upload-status {
   margin: 0;
   font-size: 0.88rem;
@@ -1753,10 +1769,22 @@ a:hover {
   background: var(--white);
 }
 
-.form-field input:focus,
-.form-field select:focus {
+.form-field input:focus-visible,
+.form-field select:focus-visible,
+.form-field textarea:focus-visible {
   outline: 2px solid var(--mdpi-green-light);
   border-color: var(--mdpi-green);
+}
+
+.checkbox-card:focus-within {
+  box-shadow: var(--focus-ring);
+}
+
+.word-count-band:focus-visible,
+.resource-chip:focus-visible,
+.select-tier:focus-visible,
+.manuscript-upload:focus-visible {
+  box-shadow: var(--focus-ring);
 }
 
 .form-field small {
@@ -1896,12 +1924,15 @@ a:hover {
 }
 
 .price-panel h3,
-.price-panel-head h3 {
+.price-panel h4,
+.price-panel-head h3,
+.price-panel-head h4 {
   margin: 0 0 1.25rem;
   font-size: 1.15rem;
 }
 
-.price-panel-head h3 {
+.price-panel-head h3,
+.price-panel-head h4 {
   margin-bottom: 0.2rem;
 }
 
@@ -1913,36 +1944,39 @@ a:hover {
 
 .price-lines {
   margin: 0 0 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 1rem;
 }
 
-.price-line {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+.price-lines > dt.price-line,
+.price-lines > dd.price-line {
+  display: block;
+  margin: 0;
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border);
   font-size: 0.9rem;
 }
 
-.price-line dt {
+.price-lines > dt.price-line {
   color: var(--text-muted);
 }
 
-.price-line dd {
-  margin: 0;
+.price-lines > dd.price-line {
   font-weight: 600;
   white-space: nowrap;
+  text-align: right;
 }
 
-.price-line dd .price-was {
+.price-lines > dd.price-line .price-was {
   margin-right: 0.35rem;
   color: var(--text-muted);
   font-weight: 500;
   text-decoration: line-through;
 }
 
-.price-discount dt,
-.price-discount dd {
+.price-lines > dt.price-discount,
+.price-lines > dd.price-discount {
   color: var(--mdpi-green);
 }
 

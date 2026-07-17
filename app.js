@@ -265,7 +265,7 @@ function updateTierCardPrices(bandIndex) {
     window.setTimeout(() => amountEl.classList.remove("is-updating"), 220);
 
     if (captionEl) {
-      captionEl.textContent = isStarting ? "Starting from" : "For this word count";
+      captionEl.textContent = isStarting ? "From" : "This band";
     }
   });
 }
@@ -279,6 +279,7 @@ function setWordCountBand(index, { syncForm = true } = {}) {
 
   if (slider) {
     slider.value = String(bandIndex);
+    slider.setAttribute("aria-valuenow", String(bandIndex));
     slider.setAttribute("aria-valuetext", formatWordRange(bandIndex));
   }
   if (rangeEl) rangeEl.textContent = formatWordRange(bandIndex);
@@ -317,6 +318,7 @@ function initPriceGuides() {
         class="word-count-band${index === 0 ? " is-active" : ""}"
         data-index="${index}"
         aria-pressed="${index === 0 ? "true" : "false"}"
+        aria-label="${formatWordRange(index)}"
       >
         ${shortBandLabel(index)}
       </button>
@@ -1082,6 +1084,61 @@ const VIDEO_EXAMPLES = [
   },
 ];
 
+function getFocusableElements(container) {
+  return Array.from(
+    container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((el) => !el.closest(".hidden") && el.getClientRects().length > 0);
+}
+
+function setModalHidden(modal, hidden) {
+  if (!modal) return;
+  modal.classList.toggle("hidden", hidden);
+  modal.setAttribute("aria-hidden", String(hidden));
+  if ("inert" in modal) modal.inert = hidden;
+}
+
+function openAccessibleModal(modal, { trigger, focusSelector } = {}) {
+  if (!modal) return;
+  modal._previousFocus = trigger || document.activeElement;
+  setModalHidden(modal, false);
+  document.body.style.overflow = "hidden";
+  const focusTarget =
+    (focusSelector && modal.querySelector(focusSelector)) ||
+    getFocusableElements(modal)[0];
+  focusTarget?.focus();
+}
+
+function closeAccessibleModal(modal) {
+  if (!modal) return;
+  setModalHidden(modal, true);
+  document.body.style.overflow = "";
+  if (modal._previousFocus?.focus) modal._previousFocus.focus();
+  modal._previousFocus = null;
+}
+
+function handleModalKeydown(event, modal, closeFn) {
+  if (!modal || modal.classList.contains("hidden")) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeFn();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const focusable = getFocusableElements(modal);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 function initExampleModal() {
   const modal = document.getElementById("example-modal");
   const titleEl = document.getElementById("example-modal-title");
@@ -1146,13 +1203,14 @@ function initExampleModal() {
     images = item.images || [];
     titleEl.textContent = item.title;
     showImage(0);
-    modal.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
+    openAccessibleModal(modal, {
+      trigger: document.activeElement,
+      focusSelector: ".example-modal-close",
+    });
   }
 
   function closeModal() {
-    modal.classList.add("hidden");
-    document.body.style.overflow = "";
+    closeAccessibleModal(modal);
     dragging = false;
     stage.classList.remove("is-dragging");
   }
@@ -1223,7 +1281,7 @@ function initExampleModal() {
 
   document.addEventListener("keydown", (event) => {
     if (modal.classList.contains("hidden")) return;
-    if (event.key === "Escape") closeModal();
+    handleModalKeydown(event, modal, closeModal);
     if (event.key === "ArrowLeft") showImage(imageIndex - 1);
     if (event.key === "ArrowRight") showImage(imageIndex + 1);
     if (event.key === "+" || event.key === "=") setZoom(scale + ZOOM_STEP);
@@ -1237,6 +1295,7 @@ function initVideoExampleModal() {
   const sidebar = document.getElementById("video-example-sidebar");
   const descriptionEl = document.getElementById("video-example-description");
   const videoEl = document.getElementById("video-example-video");
+  const panelEl = document.getElementById("video-example-panel");
   if (!modal || !sidebar || !descriptionEl || !videoEl) return;
 
   let activeId = "abstract";
@@ -1250,6 +1309,8 @@ function initVideoExampleModal() {
           class="video-type-card${active}"
           data-video-type="${item.id}"
           role="tab"
+          id="video-tab-${item.id}"
+          aria-controls="video-example-panel"
           aria-selected="${item.id === activeId}"
         >
           <span class="video-type-name">${item.name}</span>
@@ -1267,6 +1328,7 @@ function initVideoExampleModal() {
     videoEl.removeAttribute("src");
     videoEl.src = item.src;
     videoEl.load();
+    if (panelEl) panelEl.setAttribute("aria-labelledby", `video-tab-${activeId}`);
     if (autoplay) {
       videoEl.play().catch(() => {});
     }
@@ -1275,14 +1337,15 @@ function initVideoExampleModal() {
 
   function openModal() {
     showType(activeId);
-    modal.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
+    openAccessibleModal(modal, {
+      trigger: document.activeElement,
+      focusSelector: ".example-modal-close",
+    });
   }
 
   function closeModal() {
     videoEl.pause();
-    modal.classList.add("hidden");
-    document.body.style.overflow = "";
+    closeAccessibleModal(modal);
   }
 
   sidebar.addEventListener("click", (event) => {
@@ -1307,7 +1370,7 @@ function initVideoExampleModal() {
 
   document.addEventListener("keydown", (event) => {
     if (modal.classList.contains("hidden")) return;
-    if (event.key === "Escape") closeModal();
+    handleModalKeydown(event, modal, closeModal);
   });
 
   showType("abstract");
@@ -1322,10 +1385,11 @@ function formatMoney(amount, currency) {
 }
 
 function setLine(id, value, currency, active, freeLabel) {
-  const line = document.getElementById(id);
-  if (!line) return;
-  const dd = line.querySelector("dd");
-  line.classList.toggle("is-active", !!active);
+  const dd = document.getElementById(id);
+  if (!dd) return;
+  const dt = document.getElementById(`${id}-label`);
+  dd.classList.toggle("is-active", !!active);
+  dt?.classList.toggle("is-active", !!active);
   if (!active) {
     dd.textContent = "—";
     return;
@@ -1360,6 +1424,11 @@ function updateQuoteUx(services, total, currency) {
     } else if (n === "3") {
       step.classList.toggle("is-active", hasEstimate);
       step.classList.toggle("is-done", hasEstimate);
+    }
+    if (step.classList.contains("is-active")) {
+      step.setAttribute("aria-current", "step");
+    } else {
+      step.removeAttribute("aria-current");
     }
   });
 
@@ -1472,9 +1541,8 @@ function calculateQuote() {
   const videoCampaignActive = videoActive && isVideoCampaignActive();
   const videoBase = getVideoBasePrice(videoType);
   setLine("line-video", video, currency, videoActive);
-  const videoLine = document.getElementById("line-video");
-  const videoDt = videoLine?.querySelector("dt");
-  const videoDd = videoLine?.querySelector("dd");
+  const videoDt = document.getElementById("line-video-label");
+  const videoDd = document.getElementById("line-video");
   if (videoDt) {
     videoDt.textContent = videoCampaignActive
       ? "Video Production (VIDEO10 · 10% off)"
@@ -1484,11 +1552,14 @@ function calculateQuote() {
     videoDd.innerHTML = `<span class="price-was">${formatMoney(videoBase, currency)}</span> ${formatMoney(video, currency)}`;
   }
 
+  const discountLabel = document.getElementById("line-discount-label");
   if (discount > 0) {
     discountLine.classList.remove("hidden");
-    discountLine.querySelector("dd").textContent = `−${formatMoney(discount, currency)}`;
+    discountLabel?.classList.remove("hidden");
+    discountLine.textContent = `−${formatMoney(discount, currency)}`;
   } else {
     discountLine.classList.add("hidden");
+    discountLabel?.classList.add("hidden");
   }
 
   totalEl.textContent = formatMoney(total, currency);
@@ -1811,19 +1882,32 @@ function syncFormState() {
   calculateQuote();
 }
 
+function updateWordsDescribedBy() {
+  const wordsInput = form?.words;
+  if (!wordsInput) return;
+  const ids = ["words-upload-hint"];
+  const perk = document.getElementById("language-figure-perk");
+  if (perk && !perk.classList.contains("hidden")) ids.push("language-figure-perk");
+  wordsInput.setAttribute("aria-describedby", ids.join(" "));
+}
+
 function updateLanguagePerkMessage(hasLanguage, tier, isAcademic) {
   const languagePerk = document.getElementById("language-figure-perk");
   if (!languagePerk) return;
   languagePerk.classList.toggle("hidden", !hasLanguage);
-  if (!hasLanguage) return;
+  if (!hasLanguage) {
+    updateWordsDescribedBy();
+    return;
+  }
 
   if (isAcademic) {
     languagePerk.innerHTML =
-      "With Academic: <strong>Figure &amp; Table Editing</strong> is included when figures/tables are detected in your manuscript, and <strong>Layout Editing for MDPI journals</strong> is included.";
+      "Academic: <strong>Figure &amp; Table Editing</strong> included when detected, plus <strong>MDPI Layout Editing</strong>.";
   } else {
     languagePerk.innerHTML =
-      `With ${tier === "standard" ? "Standard" : "Rapid"}: <strong>10% off</strong> Figure &amp; Table Editing when added to language editing.`;
+      `${tier === "standard" ? "Standard" : "Rapid"}: <strong>10% off</strong> Figure &amp; Table Editing when bundled with language editing.`;
   }
+  updateWordsDescribedBy();
 }
 
 function updateAcademicRecommendation(hasLanguage, tier) {
@@ -2090,6 +2174,15 @@ function applyQuoteRequestFromUrl() {
 menuToggle?.addEventListener("click", () => {
   const open = mainNav.classList.toggle("is-open");
   menuToggle.setAttribute("aria-expanded", String(open));
+  menuToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !mainNav?.classList.contains("is-open")) return;
+  mainNav.classList.remove("is-open");
+  menuToggle?.setAttribute("aria-expanded", "false");
+  menuToggle?.setAttribute("aria-label", "Open menu");
+  menuToggle?.focus();
 });
 
 if (form) {
@@ -2158,34 +2251,7 @@ if (form) {
     syncFormState();
   });
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const services = getSelectedServices();
-    if (services.length === 0) {
-      showToast("Please select at least one service.");
-      return;
-    }
-    if (services.includes("language") && !(Number(form.words.value) > 0)) {
-      showToast("Enter the word count for Language Editing.");
-      return;
-    }
-    if (services.includes("figures") && !(Number(form.figures.value) > 0)) {
-      showToast("Enter the number of figures and tables.");
-      return;
-    }
-    if (services.includes("video") && !getVideoTypeValue()) {
-      showToast("Select a video type for Video Production.");
-      return;
-    }
-    const quote = calculateQuote();
-    if (quote.total <= 0) {
-      showToast("Complete the required fields for your selected services.");
-      return;
-    }
-    saveOrderAndGoToCheckout();
-  });
-
-  document.getElementById("submit-order-btn")?.addEventListener("click", (event) => {
+  function handleQuoteSubmit(event) {
     event.preventDefault();
     const services = getSelectedServices();
     if (services.length === 0) {
@@ -2210,7 +2276,9 @@ if (form) {
       return;
     }
     saveOrderAndGoToCheckout();
-  });
+  }
+
+  form.addEventListener("submit", handleQuoteSubmit);
 
   document.getElementById("check-ioap-btn")?.addEventListener("click", () => {
     document.getElementById("quote").scrollIntoView({ behavior: "smooth" });
@@ -2240,6 +2308,9 @@ if (form) {
 
 initExampleModal();
 initVideoExampleModal();
+document.querySelectorAll('[role="dialog"]').forEach((modal) => {
+  if (modal.classList.contains("hidden")) setModalHidden(modal, true);
+});
 initVideoTypeOrdering();
 initIoapInstitutionPicker();
 // Upload UI can work even if quote form init order changes.
