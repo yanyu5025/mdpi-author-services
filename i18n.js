@@ -31,7 +31,7 @@ const MDPI_I18N = {
     journeyTitle: "How it works",
     journeyLead: "From estimate to edited manuscript in a few clear steps.",
     journey1Title: "Choose services",
-    journey1Desc: "Select your services and provide the required details.",
+    journey1Desc: "Select your services and provide the required information.",
     journey2Title: "Get an instant quote",
     journey2Desc: "Compare tiers, confirm word count, and view a live price.",
     journey3Title: "Submit & pay",
