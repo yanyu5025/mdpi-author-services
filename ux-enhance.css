@@ -2326,7 +2326,7 @@ html {
 .faq-page .faq-contact-card .btn {
   justify-content: center;
   width: 100%;
-  margin-top: 0.35rem;
+  margin-top: 0.75rem;
   background: var(--white);
 }
 

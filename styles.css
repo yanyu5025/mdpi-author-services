@@ -2300,6 +2300,9 @@ a:hover {
 .faq-page-aside {
   position: sticky;
   top: calc(var(--header-h, 4.25rem) + 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .faq-aside-card {
@@ -2311,7 +2314,7 @@ a:hover {
 }
 
 .faq-aside-card h2 {
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text);
@@ -2334,7 +2337,7 @@ a:hover {
 }
 
 .faq-aside-list li + li {
-  margin-top: 0.45rem;
+  margin-top: 0.55rem;
 }
 
 .faq-aside-list a {
