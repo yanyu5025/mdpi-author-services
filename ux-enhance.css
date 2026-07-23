@@ -323,6 +323,15 @@ html {
   border-color: var(--mdpi-accent);
 }
 
+.checkbox-card.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.checkbox-card.is-disabled:hover {
+  border-color: var(--border);
+}
+
 .price-panel {
   border: 1px solid rgba(0, 85, 195, 0.2);
   box-shadow: var(--shadow-lg);
@@ -1682,6 +1691,135 @@ html {
   .video-service-page .service-hero-section .service-hero-actions .btn-text {
     width: auto;
   }
+}
+
+.logo-img-mdpi {
+  height: 1.65rem;
+  max-width: min(120px, 36vw);
+}
+
+/* Homepage campaign carousel */
+.campaign-carousel {
+  position: relative;
+  min-width: 0;
+}
+
+.campaign-slides {
+  position: relative;
+}
+
+.campaign-slide {
+  position: relative;
+}
+
+.campaign-slide:not(.is-active) {
+  display: none;
+}
+
+.campaign-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.campaign-carousel-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 85, 195, 0.22);
+  cursor: pointer;
+}
+
+.campaign-carousel-dot.is-active {
+  background: var(--mdpi-green);
+  transform: scale(1.15);
+}
+
+.campaign-carousel-dot:focus-visible {
+  outline: 2px solid var(--mdpi-green);
+  outline-offset: 2px;
+}
+
+/* Quote upload step */
+.quote-upload-zone {
+  position: relative;
+  padding: 1.1rem 1.2rem;
+  border: 1.5px dashed rgba(0, 85, 195, 0.45);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #f4fbf9 0%, var(--white) 100%);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.quote-upload-zone:hover,
+.quote-upload-zone:focus-visible,
+.quote-upload-zone.is-dragover {
+  border-color: var(--mdpi-green);
+  background: var(--mdpi-green-light);
+  box-shadow: inset 0 0 0 1px rgba(0, 85, 195, 0.12);
+  outline: none;
+}
+
+.quote-upload-zone.is-loading {
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.quote-upload-title {
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+  color: var(--mdpi-green-dark);
+}
+
+.quote-upload-help {
+  margin: 0 0 0.55rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.quote-upload-status {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.quote-upload-browse {
+  color: var(--mdpi-green);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.quote-upload-status.is-success {
+  color: var(--mdpi-green-dark);
+}
+
+.quote-upload-status.is-error {
+  color: #b42318;
+}
+
+.service-panel-turnaround {
+  margin: -0.15rem 0 0.85rem;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.service-panel-turnaround strong {
+  color: var(--text);
+}
+
+.figures-high-count-note {
+  display: block;
+  margin-top: 0.45rem;
+  color: #8a4b00;
+}
+
+#submit-order-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 /* Homepage video campaign */

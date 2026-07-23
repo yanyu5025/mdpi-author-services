@@ -459,17 +459,26 @@ function renderProgress() {
 function renderLineItems() {
   const { pricing, currency, services, tier, words, figures, videoType } = order;
   const rows = [];
-  if (services.includes("language") && pricing.language > 0) {
-    rows.push({
+  if (services.includes("language") && (pricing.language > 0 || pricing.languageBase > 0)) {
+    const row = {
       label: `${SERVICE_TITLES.language} (${TIER_LABELS[tier] || tier}, ${words.toLocaleString()} words)`,
       amount: pricing.language,
-    });
+    };
+    if (pricing.editingCampaign && pricing.languageBase > pricing.language) {
+      row.wasAmount = pricing.languageBase;
+      row.note = "MDPI30 · CHF 30 off";
+    }
+    rows.push(row);
   }
   if (services.includes("figures") && (pricing.figures > 0 || pricing.figuresIncluded)) {
     rows.push({
       label: `${SERVICE_TITLES.figures} (${figures} item${figures === 1 ? "" : "s"})`,
       amount: pricing.figuresIncluded ? 0 : pricing.figures,
-      note: pricing.figuresIncluded ? "Included (Academic)" : null,
+      note: pricing.figuresIncluded
+        ? "Included (Academic)"
+        : pricing.figuresDiscountRate > 0
+          ? `${Math.round(pricing.figuresDiscountRate * 100)}% off (${tier === "rapid" ? "Rapid" : "Standard"})`
+          : null,
     });
   }
   if (services.includes("layout") && (pricing.layout > 0 || pricing.layoutIncluded)) {
@@ -490,15 +499,29 @@ function renderLineItems() {
     });
   }
   if (pricing.ioapDiscount > 0) {
-    rows.push({ label: "IOAP Discount (15%)", amount: -pricing.ioapDiscount, isDiscount: true });
+    rows.push({
+      label: "IOAP Discount (15% · Language Editing)",
+      amount: -pricing.ioapDiscount,
+      isDiscount: true,
+    });
   }
   return rows
     .map((row) => {
-      const value = row.note
-        ? row.note
-        : row.isDiscount
-          ? `−${formatMoney(Math.abs(row.amount), currency)}`
-          : formatMoney(row.amount, currency);
+      let value;
+      if (row.note && row.amount === 0 && !row.wasAmount) {
+        value = row.note;
+      } else if (row.wasAmount && row.wasAmount > row.amount) {
+        value = `<span class="price-was">${formatMoney(row.wasAmount, currency)}</span> ${formatMoney(row.amount, currency)}`;
+        if (row.note) {
+          value += ` <span class="checkout-line-note">${escapeHtml(row.note)}</span>`;
+        }
+      } else if (row.isDiscount) {
+        value = `−${formatMoney(Math.abs(row.amount), currency)}`;
+      } else if (row.note) {
+        value = row.note;
+      } else {
+        value = formatMoney(row.amount, currency);
+      }
       return `<div class="checkout-summary-row${row.isDiscount ? " is-discount" : ""}"><dt>${escapeHtml(row.label)}</dt><dd>${value}</dd></div>`;
     })
     .join("");
@@ -904,6 +927,15 @@ function bindCheckoutEvents() {
     const code = order.invoice.voucher.toUpperCase();
     if (code === "VIDEO10" && order.services.includes("video")) {
       alert("VIDEO10 is already applied in your video production quote.");
+    } else if (
+      code === "MDPI30" &&
+      order.services.includes("language") &&
+      ["rapid", "academic"].includes(order.tier) &&
+      order.pricing?.editingCampaign
+    ) {
+      alert("MDPI30 is already applied to your Rapid or Academic editing order.");
+    } else if (code === "MDPI30" && order.services.includes("language") && order.tier === "standard") {
+      alert("MDPI30 applies to Rapid and Academic editing only.");
     } else if (code) {
       alert("Voucher code noted. Discount codes are validated at payment in this prototype.");
     }

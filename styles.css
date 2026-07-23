@@ -161,6 +161,11 @@ a:hover {
   color: var(--as-navy);
 }
 
+.logo-img-mdpi {
+  height: 1.65rem;
+  max-width: min(120px, 36vw);
+}
+
 .main-nav {
   display: flex;
   gap: 1.5rem;
@@ -172,6 +177,30 @@ a:hover {
   align-items: center;
   gap: 0.75rem;
   margin-left: 0.5rem;
+}
+
+.header-mdpi-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.header-mdpi-link:hover {
+  color: var(--as-primary);
+}
+
+.header-mdpi-link .icon-external {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.faq-site-header .header-actions {
+  margin-left: auto;
 }
 
 .lang-selector select {

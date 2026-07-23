@@ -167,8 +167,8 @@
       }
     </script>
     <link rel="stylesheet" href="fonts.css?v=20260716b" />
-    <link rel="stylesheet" href="styles.css?v=20260717e" />
-    <link rel="stylesheet" href="ux-enhance.css?v=20260717i" />
+    <link rel="stylesheet" href="styles.css?v=20260723a" />
+    <link rel="stylesheet" href="ux-enhance.css?v=20260723c" />
   </head>
   <body>
     <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to content</a>
@@ -190,6 +190,17 @@
           <a href="faq/language-editing.html" data-i18n="navFaqs">FAQs</a>
         </nav>
         <div class="header-actions">
+          <a
+            href="https://www.mdpi.com"
+            class="header-mdpi-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-i18n="headerMdpi"
+          >
+            MDPI
+            <svg class="icon-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span class="visually-hidden" data-i18n="headerMdpiHint">(opens in new tab)</span>
+          </a>
           <div class="lang-selector">
             <label class="visually-hidden" for="site-lang" data-i18n="langLabel">Language</label>
             <select id="site-lang">
@@ -212,7 +223,7 @@
             <p class="eyebrow" data-i18n="heroEyebrow">Professional editorial support for researchers</p>
             <h1 id="hero-title" data-i18n="heroTitle">English Language Editing for Researchers</h1>
             <p class="hero-lead" data-i18n="heroLead">
-              Expert English editing, figure enhancement, and layout formatting for MDPI and non-MDPI authors.
+              Certified English language editing, figure enhancement, graphical abstract creation, and video production—delivered by experts. Available to MDPI and non-MDPI authors worldwide.
             </p>
             <div class="hero-stats">
               <div class="stat" role="group" aria-label="60,000 plus papers edited">
@@ -230,28 +241,52 @@
             </div>
             <div class="hero-actions">
               <a href="#quote" class="btn btn-primary" data-i18n="heroCta">Get a Free Quote</a>
-              <a href="#services" class="btn btn-outline" data-i18n="heroCompare">Compare editing tiers</a>
+              <a href="#services" class="btn btn-outline" data-i18n="heroCompare">Compare Editing Tiers</a>
             </div>
             <p class="hero-micro" data-i18n="heroMicro">Instant estimate · No commitment</p>
           </div>
-          <aside class="hero-card campaign-card" aria-labelledby="video-campaign-title">
-            <h2 id="video-campaign-title" data-i18n="campaignTitle">Bring your research to life—and save 10%</h2>
-            <p class="campaign-copy" data-i18n="campaignCopy">
-              Professional academic videos for journal pages, teaching, and research outreach.
-            </p>
-            <div class="campaign-offer">
-              <span class="campaign-discount" data-i18n="campaignDiscount">10% off</span>
-              <div>
-                <span class="campaign-code-label" data-i18n="campaignCodeLabel">Use promo code</span>
-                <strong class="campaign-code">VIDEO10</strong>
-              </div>
+          <div class="campaign-carousel" data-campaign-carousel aria-roledescription="carousel" aria-label="Promotions">
+            <div class="campaign-slides">
+              <aside class="hero-card campaign-card campaign-slide is-active" aria-labelledby="video-campaign-title">
+                <h2 id="video-campaign-title" data-i18n="campaignTitle">Bring your research to life—and save 10%</h2>
+                <p class="campaign-copy" data-i18n="campaignCopy">
+                  Professional academic videos for journal pages, teaching, and research outreach.
+                </p>
+                <div class="campaign-offer">
+                  <span class="campaign-discount" data-i18n="campaignDiscount">10% off</span>
+                  <div>
+                    <span class="campaign-code-label" data-i18n="campaignCodeLabel">Use promo code</span>
+                    <strong class="campaign-code">VIDEO10</strong>
+                  </div>
+                </div>
+                <p class="campaign-dates" data-i18n="campaignDates">Valid 1 July–30 December 2026</p>
+                <div class="campaign-actions">
+                  <a href="video-production.html" class="btn btn-primary" data-i18n="campaignExplore">Explore Video Production</a>
+                  <a href="#quote" class="btn btn-outline" data-i18n="campaignQuote">Get a Quote</a>
+                </div>
+              </aside>
+              <aside class="hero-card campaign-card campaign-slide" aria-labelledby="editing-campaign-title" hidden>
+                <h2 id="editing-campaign-title" data-i18n="editingCampaignTitle">Fast. Accurate. Simple.</h2>
+                <p class="campaign-copy" data-i18n="editingCampaignCopy">Get CHF 30 OFF Rapid and Academic Editing</p>
+                <div class="campaign-offer">
+                  <span class="campaign-discount" data-i18n="editingCampaignDiscount">CHF 30 OFF</span>
+                  <div>
+                    <span class="campaign-code-label" data-i18n="campaignCodeLabel">Code:</span>
+                    <strong class="campaign-code">MDPI30</strong>
+                  </div>
+                </div>
+                <p class="campaign-dates" data-i18n="editingCampaignDates">Valid until 30 August 2026</p>
+                <div class="campaign-actions">
+                  <a href="#quote" class="btn btn-primary" data-i18n="campaignQuote">Get a Quote</a>
+                  <a href="#services" class="btn btn-outline" data-i18n="heroCompare">Compare Editing Tiers</a>
+                </div>
+              </aside>
             </div>
-            <p class="campaign-dates" data-i18n="campaignDates">Valid 1 July–30 December 2026</p>
-            <div class="campaign-actions">
-              <a href="video-production.html" class="btn btn-primary" data-i18n="campaignExplore">Explore Video Production</a>
-              <a href="#quote" class="btn btn-outline" data-i18n="campaignQuote">Get a Quote</a>
+            <div class="campaign-carousel-dots" role="tablist" aria-label="Choose promotion">
+              <button type="button" class="campaign-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Video production promotion" data-slide="0"></button>
+              <button type="button" class="campaign-carousel-dot" role="tab" aria-selected="false" aria-label="Editing promotion" data-slide="1"></button>
             </div>
-          </aside>
+          </div>
         </div>
       </section>
 
@@ -315,76 +350,13 @@
             <div class="word-count-control-header">
               <div>
                 <p class="word-count-label" id="word-count-label">Compare tiers by word count</p>
-                <p class="word-count-help">Upload a manuscript or select a band below.</p>
+                <p class="word-count-help">Select a word count band below.</p>
               </div>
               <div class="word-count-readout" aria-live="polite">
                 <strong id="word-count-range">1,000 – 2,000 words</strong>
                 <span id="word-count-hint">Starting prices shown</span>
               </div>
             </div>
-
-            <div
-              class="manuscript-upload"
-              id="manuscript-upload"
-              tabindex="0"
-              role="button"
-              aria-label="Upload manuscript file"
-              aria-describedby="manuscript-upload-desc manuscript-upload-status"
-              aria-controls="manuscript-file-input"
-            >
-              <input
-                type="file"
-                id="manuscript-file-input"
-                class="manuscript-file-input"
-                accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                aria-label="Choose manuscript file (.doc or .docx)"
-              />
-              <div class="manuscript-upload-body" id="manuscript-upload-desc">
-                <p class="manuscript-upload-title">Upload manuscript (.doc / .docx)</p>
-                <p class="manuscript-upload-help">
-                  Detects words and figures in one upload. Figure editing is optional with Standard/Rapid and included with Academic.
-                </p>
-                <p class="manuscript-upload-status" id="manuscript-upload-status" aria-live="polite">
-                  Drag &amp; drop a file here, or <span class="manuscript-browse">browse</span>
-                </p>
-              </div>
-              <div id="manuscript-detection" class="manuscript-detection hidden" aria-live="polite">
-                <div class="detection-grid">
-                  <div class="detection-stat">
-                    <strong id="detect-words">0</strong>
-                    <span>Words</span>
-                  </div>
-                  <div class="detection-stat">
-                    <strong id="detect-figures">0</strong>
-                    <span>Figures</span>
-                  </div>
-                  <div class="detection-stat">
-                    <strong id="detect-tables">0</strong>
-                    <span>Tables</span>
-                  </div>
-                </div>
-                <div class="detection-figure-offer" id="detection-figure-offer">
-                  <div class="detection-figure-copy">
-                    <p class="detection-figure-title">
-                      Figure &amp; Table Editing
-                      <span class="detection-badge" id="detection-figure-badge">Optional with Standard / Rapid</span>
-                    </p>
-                    <p class="detection-figure-price" id="detection-figure-price">
-                      No figures or tables detected
-                    </p>
-                  </div>
-                  <label class="detection-include" id="detection-include-label">
-                    <input type="checkbox" id="include-detected-figures" />
-                    <span id="detection-include-text">Add with Standard / Rapid</span>
-                  </label>
-                  <p class="detection-included-note hidden" id="detection-included-note">
-                    Included with Academic
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="word-count-divider"><span>or choose a band</span></div>
 
             <label class="word-count-slider-label" for="word-count-slider">
               Word count
@@ -424,7 +396,6 @@
                 <ul class="check-list">
                   <li>Grammar, terminology, and clarity</li>
                   <li>Editing certificate</li>
-                  <li>10% off Figure &amp; Table Editing</li>
                 </ul>
                 <button class="btn btn-outline btn-block select-tier" data-tier="standard">Select Standard</button>
               </div>
@@ -451,6 +422,7 @@
                   <li>1-year free re-editing</li>
                   <li>Cover &amp; response letter editing</li>
                   <li>Two dedicated editors</li>
+                  <li>10% off Figure &amp; Table Editing</li>
                 </ul>
                 <button class="btn btn-primary btn-block select-tier" data-tier="rapid">Select Rapid</button>
               </div>
@@ -504,7 +476,7 @@
                 <small>per figure</small>
               </p>
               <p>Publication-ready figures and tables.</p>
-              <span class="addon-meta">1 business day</span>
+              <span class="addon-meta">1 day</span>
               <div class="resource-toolstrip" role="group" aria-label="Figure editing resources">
                 <button type="button" class="resource-chip resource-chip-examples link-examples" data-example="figures" aria-label="View Figure and Table Editing examples">
                   <span class="resource-chip-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="5.5" cy="6.2" r="1.2" fill="currentColor"/><path d="M1.8 11.5 5.8 8.2l2.4 2.1L12.2 6l2 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -552,7 +524,7 @@
                 <small>per submission</small>
               </p>
               <p>MDPI house style and reference checks.</p>
-              <span class="addon-meta">1 business day</span>
+              <span class="addon-meta">1 day</span>
               <div class="resource-toolstrip" role="group" aria-label="Layout editing resources">
                 <button type="button" class="resource-chip resource-chip-examples link-examples" data-example="layout" aria-label="View Layout Editing examples">
                   <span class="resource-chip-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="5.5" cy="6.2" r="1.2" fill="currentColor"/><path d="M1.8 11.5 5.8 8.2l2.4 2.1L12.2 6l2 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -657,45 +629,76 @@
           </div>
 
           <ol class="quote-steps" aria-label="Quote progress">
-            <li class="is-active" data-quote-step="1" aria-current="step"><span class="quote-step-num" aria-hidden="true">1</span><span class="quote-step-label" data-i18n="quoteStep1">Select services</span></li>
-            <li data-quote-step="2"><span class="quote-step-num" aria-hidden="true">2</span><span class="quote-step-label" data-i18n="quoteStep2">Configure quote</span></li>
-            <li data-quote-step="3"><span class="quote-step-num" aria-hidden="true">3</span><span class="quote-step-label" data-i18n="quoteStep3">Review &amp; checkout</span></li>
+            <li class="is-active" data-quote-step="1" aria-current="step"><span class="quote-step-num" aria-hidden="true">1</span><span class="quote-step-label" data-i18n="quoteStep1">Upload your document</span></li>
+            <li data-quote-step="2"><span class="quote-step-num" aria-hidden="true">2</span><span class="quote-step-label" data-i18n="quoteStep2">Configure your quote (select services)</span></li>
+            <li data-quote-step="3"><span class="quote-step-num" aria-hidden="true">3</span><span class="quote-step-label" data-i18n="quoteStep3">Review &amp; Checkout</span></li>
           </ol>
 
           <div class="quote-layout">
             <form id="quote-form" class="quote-form" novalidate aria-describedby="select-service-hint">
+              <fieldset class="form-group quote-upload-step">
+                <legend><span class="legend-step">1</span> <span data-i18n="quoteStep1">Upload your document</span></legend>
+                <div
+                  class="quote-upload-zone"
+                  id="quote-upload-zone"
+                  tabindex="0"
+                  role="button"
+                  aria-label="Upload manuscript file"
+                  aria-describedby="quote-upload-help quote-upload-status"
+                >
+                  <input
+                    type="file"
+                    id="quote-manuscript-input"
+                    class="manuscript-file-input"
+                    accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    aria-label="Choose manuscript file (.doc or .docx)"
+                  />
+                  <p class="quote-upload-title">Upload manuscript (.doc / .docx)</p>
+                  <p class="quote-upload-help" id="quote-upload-help">
+                    Required for all services except Video Production. Detects words and figures to pre-fill your quote.
+                  </p>
+                  <p class="quote-upload-status" id="quote-upload-status" aria-live="polite">
+                    Drag &amp; drop a file here, or <span class="quote-upload-browse">browse</span>
+                  </p>
+                </div>
+              </fieldset>
+
               <fieldset class="form-group">
-                <legend><span class="legend-step">1</span> <span data-i18n="selectedServices">Selected service(s)</span></legend>
+                <legend><span class="legend-step">2</span> <span data-i18n="quoteStep2">Configure your quote (select services)</span></legend>
                 <p class="form-hint" id="select-service-hint" data-i18n="selectServiceHint">Select one or more services.</p>
                 <label class="checkbox-card">
-                  <input type="checkbox" name="service" value="language" checked />
+                  <input type="checkbox" name="service" value="language" />
                   <span class="checkbox-card-body">
                     <strong>Language Editing</strong>
-                    <small>Standard, Rapid, or Academic</small>
+                    <small>Standard, Rapid, or Academic · <span class="service-turnaround" data-turnaround-service="language">Turnaround varies by tier</span></small>
                   </span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="service" value="figures" />
                   <span class="checkbox-card-body">
                     <strong>Figure &amp; Table Editing</strong>
+                    <small><span class="service-turnaround" data-turnaround-service="figures">1 day turnaround</span></small>
                   </span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="service" value="layout" />
                   <span class="checkbox-card-body">
                     <strong>Layout Editing</strong>
+                    <small><span class="service-turnaround" data-turnaround-service="layout">1 day turnaround</span></small>
                   </span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="service" value="graphical" />
                   <span class="checkbox-card-body">
                     <strong>Graphical Abstract</strong>
+                    <small><span class="service-turnaround" data-turnaround-service="graphical">5 working days</span></small>
                   </span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="service" value="video" />
                   <span class="checkbox-card-body">
                     <strong>Video Production</strong>
+                    <small><span class="service-turnaround" data-turnaround-service="video">15 working days</span></small>
                   </span>
                 </label>
               </fieldset>
@@ -703,7 +706,8 @@
               <p id="no-service-hint" class="no-service-hint" role="status" aria-live="polite">Select at least one service to configure your order.</p>
 
               <div id="panel-language" class="service-panel hidden" data-service="language" role="group" aria-labelledby="panel-language-title">
-                <h4 class="service-panel-title" id="panel-language-title"><span class="legend-step">2</span> Language Editing</h4>
+                <h4 class="service-panel-title" id="panel-language-title">Language Editing</h4>
+                <p class="service-panel-turnaround" id="language-turnaround-note">Turnaround: <strong id="language-turnaround-value">1 day</strong></p>
                 <div class="form-field">
                   <label for="tier">Editing Tier</label>
                   <select id="tier" name="tier">
@@ -714,25 +718,14 @@
                 </div>
                 <div class="form-field">
                   <label for="words">Number of Words</label>
-                  <div class="words-field-row">
-                    <input type="number" id="words" name="words" min="1" step="1" value="1000" placeholder="e.g. 1000" aria-describedby="words-upload-hint language-figure-perk" inputmode="numeric" />
-                    <label class="btn btn-outline btn-sm words-upload-btn" for="quote-manuscript-input">
-                      Upload .doc/.docx
-                    </label>
-                    <input
-                      type="file"
-                      id="quote-manuscript-input"
-                      class="manuscript-file-input"
-                      accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                      aria-label="Upload manuscript to detect word count"
-                    />
-                  </div>
+                  <input type="number" id="words" name="words" min="1" step="1" value="1000" placeholder="e.g. 1000" aria-describedby="words-upload-hint language-figure-perk" inputmode="numeric" />
                   <small id="words-upload-hint">
-                    Upload a Word file to detect words, or enter the count manually.
+                    Enter the word count manually, or upload a document in step 1.
                     Exclude author names, affiliations, and references when possible.
                   </small>
                   <p class="language-figure-perk" id="language-figure-perk">
-                    Standard/Rapid: <strong>10% off</strong> Figure &amp; Table Editing.
+                    Standard: Figure &amp; Table Editing available as an optional add-on at full price.
+                    Rapid: <strong>10% off</strong> Figure &amp; Table Editing when bundled.
                     Academic: Figure &amp; Table Editing (when detected) and MDPI Layout Editing are <strong>included</strong>.
                   </p>
                   <div class="academic-recommendation hidden" id="academic-recommendation" role="status">
@@ -756,23 +749,28 @@
               <div class="included-services-grid">
                 <div id="panel-figures" class="service-panel hidden" data-service="figures" role="group" aria-labelledby="figure-panel-title">
                   <h4 class="service-panel-title" id="figure-panel-title">Figure &amp; Table Editing</h4>
+                  <p class="service-panel-turnaround">Turnaround: <strong>1 day</strong></p>
                   <label class="figure-opt-in" id="figure-opt-in-row">
                     <input type="checkbox" id="quote-include-figures" />
                     <span id="figure-opt-in-text">
                       Add Figure &amp; Table Editing
-                      <small id="figure-opt-summary">Optional with Standard / Rapid · 10% off with language editing</small>
+                      <small id="figure-opt-summary">Optional add-on · discount with language editing tier</small>
                     </span>
                   </label>
                   <div class="form-field hidden" id="figure-opt-fields">
                     <label for="figures">Total Number of Figures and Tables</label>
-                    <input type="number" id="figures" name="figures" min="1" placeholder="e.g. 5" aria-describedby="figures-detection-hint figures-discount-hint" inputmode="numeric" />
+                    <input type="number" id="figures" name="figures" min="1" placeholder="e.g. 5" aria-describedby="figures-detection-hint figures-discount-hint figures-high-count-note" inputmode="numeric" />
                     <small id="figures-detection-hint" class="hidden"></small>
+                    <small id="figures-high-count-note" class="figures-high-count-note hidden" role="status" data-i18n="figuresHighCountNote">
+                      Submissions with more than 20 figures or tables may require one extra day for processing.
+                    </small>
                     <small id="figures-discount-hint" class="hidden">Discount applied based on your Language Editing tier</small>
                   </div>
                 </div>
 
                 <div id="panel-layout" class="service-panel hidden" data-service="layout" role="group" aria-labelledby="panel-layout-title">
                   <h4 class="service-panel-title" id="panel-layout-title">Layout Editing</h4>
+                  <p class="service-panel-turnaround">Turnaround: <strong>1 day</strong></p>
                   <label class="figure-opt-in is-selective" id="layout-opt-in-row">
                     <input type="checkbox" id="quote-include-layout" />
                     <span id="layout-opt-in-text">
@@ -799,11 +797,13 @@
 
               <div id="panel-graphical" class="service-panel hidden" data-service="graphical" role="group" aria-labelledby="panel-graphical-title">
                 <h4 class="service-panel-title" id="panel-graphical-title">Graphical Abstract</h4>
+                <p class="service-panel-turnaround">Turnaround: <strong>5 working days</strong></p>
                 <p class="form-hint">Material requirements are collected after you submit your order.</p>
               </div>
 
               <div id="panel-video" class="service-panel hidden" data-service="video" role="group" aria-labelledby="panel-video-title">
                 <h4 class="service-panel-title" id="panel-video-title">Video Production</h4>
+                <p class="service-panel-turnaround">Turnaround: <strong>15 working days</strong></p>
                 <div class="form-field">
                   <label for="video-type">Video type<span class="visually-hidden"> (required)</span></label>
                   <select id="video-type" name="videoType" required aria-required="true">
@@ -821,10 +821,10 @@
                 <div class="form-field">
                   <label for="email">Institutional Email</label>
                   <input type="email" id="email" name="email" placeholder="you@university.edu" autocomplete="email" />
-                  <small>IOAP-eligible domains receive 15% off all selected services</small>
+                  <small>IOAP-eligible domains receive 15% off English Language Editing</small>
                 </div>
                 <div id="ioap-banner" class="ioap-banner hidden" role="status">
-                  <strong>IOAP discount applied!</strong> 15% off all selected services for your institutional email.
+                  <strong>IOAP discount applied!</strong> 15% off English Language Editing for your institutional email.
                 </div>
               </div>
 
@@ -855,6 +855,11 @@
                 <span data-i18n-html="videoCampaignNote">Use promo code <strong>VIDEO10</strong></span>
                 <span class="video-campaign-dates" data-i18n="videoCampaignDates">Valid 1 July–30 December 2026</span>
               </div>
+              <div class="video-campaign-note price-panel-campaign hidden" id="editing-campaign-note" role="status">
+                <span class="video-campaign-discount" data-i18n="editingCampaignDiscount">CHF 30 OFF</span>
+                <span data-i18n-html="editingCampaignNote">Promo code <strong>MDPI30</strong> applied to Rapid &amp; Academic editing</span>
+                <span class="video-campaign-dates" data-i18n="editingCampaignDates">Valid until 30 August 2026</span>
+              </div>
               <dl class="price-lines">
                 <dt class="price-line" id="line-language-label">Language Editing</dt>
                 <dd class="price-line" id="line-language" aria-labelledby="line-language-label">—</dd>
@@ -866,7 +871,7 @@
                 <dd class="price-line" id="line-graphical" aria-labelledby="line-graphical-label">—</dd>
                 <dt class="price-line" id="line-video-label">Video Production</dt>
                 <dd class="price-line" id="line-video" aria-labelledby="line-video-label">—</dd>
-                <dt class="price-line price-discount hidden" id="line-discount-label">IOAP Discount (15%)</dt>
+                <dt class="price-line price-discount hidden" id="line-discount-label">IOAP Discount (15% · Language Editing)</dt>
                 <dd class="price-line price-discount hidden" id="line-discount" aria-labelledby="line-discount-label">—</dd>
               </dl>
               <div class="price-total" aria-live="polite" aria-atomic="true">
@@ -941,7 +946,7 @@
               offering 15% off all Author Services.
             </p>
             <p class="ioap-hint">
-              Use your institutional email when submitting; eligible domains are detected automatically.
+              Use your institutional email when submitting; eligible domains receive 15% off English Language Editing.
             </p>
             <div class="ioap-discount-panel">
               <div class="ioap-discount-amount">
@@ -1053,9 +1058,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
-    <script src="money.js?v=20260717c"></script>
-    <script src="i18n.js?v=20260717h"></script>
+    <script src="money.js?v=20260723b"></script>
+    <script src="i18n.js?v=20260723b"></script>
     <script src="ioap-institutions.js?v=20260715a"></script>
-    <script src="app.js?v=20260717f"></script>
+    <script src="app.js?v=20260723e"></script>
   </body>
 </html>

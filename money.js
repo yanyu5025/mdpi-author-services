@@ -16,6 +16,30 @@ const MDPI_FX = {
 
 const MDPI_ZERO_DECIMAL = new Set(["JPY", "KRW"]);
 
+const MDPI_EDITING_CAMPAIGN = {
+  code: "MDPI30",
+  amountChf: 30,
+  tiers: ["rapid", "academic"],
+  start: new Date("2026-07-01T00:00:00"),
+  end: new Date("2026-08-30T23:59:59"),
+};
+
+function isEditingCampaignActive(date = new Date()) {
+  return date >= MDPI_EDITING_CAMPAIGN.start && date <= MDPI_EDITING_CAMPAIGN.end;
+}
+
+function isEditingCampaignEligible(tier, date = new Date()) {
+  return (
+    isEditingCampaignActive(date) &&
+    MDPI_EDITING_CAMPAIGN.tiers.includes(String(tier || "").toLowerCase())
+  );
+}
+
+function getEditingCampaignDiscountChf(tier, languagePriceChf, date = new Date()) {
+  if (!isEditingCampaignEligible(tier, date) || languagePriceChf <= 0) return 0;
+  return Math.min(MDPI_EDITING_CAMPAIGN.amountChf, languagePriceChf);
+}
+
 function convertFromChf(amountChf, currency = "CHF") {
   return amountChf * (MDPI_FX[currency] ?? 1);
 }
@@ -36,4 +60,13 @@ function formatMoneyAmount(amountChf, currency = "CHF") {
   return converted.toFixed(2);
 }
 
-window.MdpiMoney = { FX: MDPI_FX, convertFromChf, formatMoney, formatMoneyAmount };
+window.MdpiMoney = {
+  FX: MDPI_FX,
+  EDITING_CAMPAIGN: MDPI_EDITING_CAMPAIGN,
+  convertFromChf,
+  formatMoney,
+  formatMoneyAmount,
+  isEditingCampaignActive,
+  isEditingCampaignEligible,
+  getEditingCampaignDiscountChf,
+};
