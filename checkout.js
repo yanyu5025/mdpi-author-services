@@ -1,6 +1,3 @@
-const MDPI_CONNECT_URL =
-  "https://www.figma.com/proto/FJTRlbOLVfbhF2b3NoezOX/MDPI-Connect?node-id=3412-8277&viewport=13665%2C-9872%2C0.64&t=vA1tgJ9ytFg4U40P-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3412%3A8277&show-proto-sidebar=1&page-id=3198%3A21033";
-
 const PAYMENT_METHODS = [
   { id: "mastercard", type: "card" },
   { id: "visa", type: "card" },
@@ -25,15 +22,65 @@ function externalLinkIcon() {
  * On-platform checkout wizard — reads quote payload from sessionStorage.
  */
 const ORDER_STORAGE_KEY = "mdpi-as-order-v1";
-const AUTH_STORAGE_KEY = "mdpi-as-auth-v1";
 const VAT_RATE = 0.081;
 
-/** MDPI SSO login host. Return path is set to this checkout so orders resume after auth. */
-const MDPI_LOGIN_BASE = "https://login.mdpi.com/login";
-const MDPI_REGISTER_URL = "https://susy.mdpi.com/user/register";
-/** Legacy entry URL (kept for reference); runtime login uses getLoginUrl(). */
-const MDPI_LOGIN_URL =
-  "https://login.mdpi.com/login?_target_path=https%3A%2F%2Fwww.mdpi.com%2Fuser%2Flogin%3FauthAll%3Dtrue";
+const AUTH_STORAGE_KEY = window.MdpiAuth?.AUTH_STORAGE_KEY || "mdpi-as-auth-v1";
+const MDPI_CONNECT_URL =
+  window.MdpiAuth?.MDPI_CONNECT_URL ||
+  "https://www.figma.com/proto/FJTRlbOLVfbhF2b3NoezOX/MDPI-Connect?node-id=3412-8277&viewport=13665%2C-9872%2C0.64&t=vA1tgJ9ytFg4U40P-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3412%3A8277&show-proto-sidebar=1&page-id=3198%3A21033";
+
+function loadAuthState() {
+  return window.MdpiAuth?.loadAuthState?.() ?? null;
+}
+
+function saveAuthState(state) {
+  if (window.MdpiAuth?.saveAuthState) {
+    window.MdpiAuth.saveAuthState(state);
+    return;
+  }
+  sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
+}
+
+function isLoggedIn() {
+  return window.MdpiAuth?.isLoggedIn?.() ?? false;
+}
+
+function markLoggedIn(extra = {}) {
+  if (window.MdpiAuth?.markLoggedIn) {
+    window.MdpiAuth.markLoggedIn(extra);
+    window.MdpiAuth.renderHeaderAuth?.();
+    return;
+  }
+}
+
+function getCheckoutReturnUrl() {
+  return (
+    window.MdpiAuth?.getAuthReturnUrl?.("checkout.html") ||
+    new URL("checkout.html?auth=success", window.location.href).toString()
+  );
+}
+
+function getLoginUrl() {
+  return (
+    window.MdpiAuth?.getLoginUrl?.(getCheckoutReturnUrl()) ||
+    `https://login.mdpi.com/login?_target_path=${encodeURIComponent(getCheckoutReturnUrl())}`
+  );
+}
+
+function beginLoginRedirect() {
+  saveOrder();
+  if (window.MdpiAuth?.beginLoginRedirect) {
+    window.MdpiAuth.beginLoginRedirect(getCheckoutReturnUrl());
+    return;
+  }
+  window.location.href = getLoginUrl();
+}
+
+function consumeAuthReturnParams() {
+  const returned = window.MdpiAuth?.consumeAuthReturnParams?.() ?? false;
+  if (returned) window.MdpiAuth?.renderHeaderAuth?.();
+  return returned;
+}
 
 const SERVICE_TITLES = {
   language: "English Language Editing",
@@ -112,70 +159,6 @@ function loadOrder() {
 
 function saveOrder() {
   sessionStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(order));
-}
-
-function loadAuthState() {
-  try {
-    const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function saveAuthState(state) {
-  sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
-}
-
-function isLoggedIn() {
-  return !!loadAuthState()?.loggedIn;
-}
-
-function markLoggedIn(extra = {}) {
-  const previous = loadAuthState() || {};
-  saveAuthState({
-    ...previous,
-    loggedIn: true,
-    loginPending: false,
-    loggedInAt: new Date().toISOString(),
-    ...extra,
-  });
-}
-
-function getCheckoutReturnUrl() {
-  const url = new URL("checkout.html", window.location.href);
-  url.searchParams.set("auth", "success");
-  url.hash = "";
-  return url.toString();
-}
-
-/**
- * MDPI login that returns authors to this checkout (order workflow) after authentication.
- */
-function getLoginUrl() {
-  return `${MDPI_LOGIN_BASE}?_target_path=${encodeURIComponent(getCheckoutReturnUrl())}`;
-}
-
-function beginLoginRedirect() {
-  saveAuthState({
-    ...(loadAuthState() || {}),
-    loginPending: true,
-    loginStartedAt: new Date().toISOString(),
-  });
-  // Keep the quote/order payload; only auth state changes before leaving.
-  saveOrder();
-  window.location.href = getLoginUrl();
-}
-
-function consumeAuthReturnParams() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("auth") !== "success") return false;
-  markLoggedIn({ source: "sso-return" });
-  params.delete("auth");
-  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash || ""}`;
-  window.history.replaceState({}, "", next || window.location.pathname);
-  return true;
 }
 
 function formatMoney(amount, currency = "CHF") {
@@ -337,8 +320,8 @@ function collectReviewFromForm() {
 const STEP_META = {
   account: {
     eyebrow: "Step 1 of 5",
-    title: "Log in or create an account",
-    desc: "Every order — Language Editing, Figure & Table Editing, Layout Editing, Graphical Abstract, or Video Production — requires an MDPI account before service details.",
+    title: "Log In",
+    desc: "Sign in with your MDPI account to continue this order. This step applies to every selected service before service details.",
   },
   details: {
     eyebrow: "Step 2 of 5",
@@ -774,22 +757,12 @@ function renderAccountStep() {
     <section class="checkout-account-card">
       <p class="checkout-account-lead">
         You submitted an order with <strong>${escapeHtml(serviceLabel)}</strong>.
-        Log in with your MDPI account to continue — or create an account if you are new to MDPI.
-        After authentication you will return here to finish the remaining checkout steps.
+        Log in with your MDPI account to continue. After authentication you will return here to finish the remaining checkout steps.
       </p>
       <div class="checkout-account-actions">
         <button type="button" class="btn btn-primary" id="checkout-login-btn">
           Log In
         </button>
-        <a
-          class="btn btn-outline"
-          id="checkout-register-btn"
-          href="${escapeHtml(MDPI_REGISTER_URL)}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Create an Account
-        </a>
       </div>
       <p class="checkout-account-hint" id="checkout-account-hint">
         Log In opens the MDPI sign-in page. When sign-in succeeds, you are returned to this order to continue with service details.
@@ -1169,7 +1142,7 @@ function bindCheckoutEvents() {
       const target = btn.getAttribute("data-checkout-next");
       if (checkoutStep === "account") {
         if (!isLoggedIn()) {
-          alert("Please log in or create an MDPI account before continuing.");
+          alert("Please log in with your MDPI account before continuing.");
           document.getElementById("checkout-login-btn")?.focus();
           return;
         }
@@ -1194,14 +1167,6 @@ function bindCheckoutEvents() {
     beginLoginRedirect();
   });
 
-  document.getElementById("checkout-register-btn")?.addEventListener("click", () => {
-    saveAuthState({
-      ...(loadAuthState() || {}),
-      registerStartedAt: new Date().toISOString(),
-      loginPending: true,
-    });
-  });
-
   // If the author started login and returned without an SSO callback (e.g. local demo), confirm manually.
   if (checkoutStep === "account" && !isLoggedIn() && loadAuthState()?.loginPending) {
     const hint = document.getElementById("checkout-account-hint");
@@ -1218,6 +1183,7 @@ function bindCheckoutEvents() {
       confirmBtn.textContent = "I've logged in — continue";
       confirmBtn.addEventListener("click", () => {
         markLoggedIn({ source: "login-return" });
+        window.MdpiAuth?.renderHeaderAuth?.();
         setCheckoutStep("details");
       });
       actionsEnd.innerHTML = "";
