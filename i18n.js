@@ -63,7 +63,7 @@ const MDPI_I18N = {
     totalPrice: "Total Price",
     submitOrder: "Submit Order",
     preferredCurrency: "Preferred Currency",
-    pricePanelNote: "Continue to checkout for service details, billing, and payment.",
+    pricePanelNote: "Continue to checkout to sign in, then complete service details, billing, and payment.",
     videoCampaignNote: "Use promo code <strong>VIDEO10</strong>",
     videoCampaignDates: "Valid 1 July–30 December 2026",
     editingCampaignNote: "Promo code <strong>MDPI30</strong> applied to Rapid & Academic editing",
@@ -83,6 +83,7 @@ const MDPI_I18N = {
     stepInvoice: "Invoice Information",
     stepReview: "Review",
     stepPayment: "Payment",
+    stepAccount: "Account",
     paymentMethod: "Payment method",
     scanToPay: "Scan to pay with",
     qrTestHint: "Prototype test QR code — no real payment will be processed.",
@@ -175,7 +176,7 @@ const MDPI_I18N = {
     totalPrice: "总价",
     submitOrder: "提交订单",
     preferredCurrency: "首选货币",
-    pricePanelNote: "继续结账以填写服务详情、账单并完成支付。",
+    pricePanelNote: "继续结账以登录账户，然后填写服务详情、账单并完成支付。",
     videoCampaignNote: "使用优惠码 <strong>VIDEO10</strong>",
     videoCampaignDates: "有效期：2026 年 7 月 1 日 – 12 月 30 日",
     editingCampaignNote: "优惠码 <strong>MDPI30</strong> 已应用于 Rapid 与 Academic 润色",
@@ -195,6 +196,7 @@ const MDPI_I18N = {
     stepInvoice: "发票信息",
     stepReview: "审核",
     stepPayment: "支付",
+    stepAccount: "账户",
     paymentMethod: "支付方式",
     scanToPay: "扫码支付",
     qrTestHint: "原型测试二维码——不会处理真实付款。",
@@ -231,7 +233,8 @@ const MDPI_I18N = {
 const LANG_STORAGE_KEY = "mdpi-as-lang";
 
 function getLanguage() {
-  return localStorage.getItem(LANG_STORAGE_KEY) === "zh" ? "zh" : "en";
+  // Header language switcher removed — UI stays in English.
+  return "en";
 }
 
 function t(key) {
@@ -267,24 +270,20 @@ function applyTranslations(root = document) {
     const key = el.getAttribute("data-i18n-aria");
     if (key) el.setAttribute("aria-label", t(key));
   });
-  document.documentElement.lang = getLanguage() === "zh" ? "zh-CN" : "en";
+  document.documentElement.lang = "en";
 }
 
-function setLanguage(lang) {
-  const next = lang === "zh" ? "zh" : "en";
-  localStorage.setItem(LANG_STORAGE_KEY, next);
-  document.querySelectorAll(".lang-selector select").forEach((sel) => {
-    sel.value = next;
-  });
+function setLanguage() {
+  // Language switching is disabled (header selector removed).
   applyTranslations();
-  window.dispatchEvent(new CustomEvent("mdpi-language-change", { detail: { lang: next } }));
 }
 
 function initLanguageSelector() {
-  document.querySelectorAll(".lang-selector select").forEach((select) => {
-    select.value = getLanguage();
-    select.addEventListener("change", () => setLanguage(select.value));
-  });
+  try {
+    localStorage.removeItem(LANG_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
   applyTranslations();
 }
 

@@ -415,12 +415,84 @@ let layoutSelectiveOptIn = false;
 let figuresCountUserEdited = false;
 
 function requiresManuscriptUpload(services) {
-  return services.some((service) => service !== "video");
+  return getServicesRequiringManuscript(services).length > 0;
+}
+
+function getServicesRequiringManuscript(services) {
+  return (services || []).filter((service) => service !== "video");
+}
+
+function formatServiceList(services) {
+  const names = services.map((service) => {
+    if (service === "language") return "Language Editing";
+    return companionServiceLabel(service);
+  });
+  if (names.length <= 1) return names[0] || "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 }
 
 function hasRequiredManuscriptUpload(services) {
   if (!requiresManuscriptUpload(services)) return true;
   return !!lastManuscriptDetection;
+}
+
+function clearManuscriptUploadError() {
+  const alertEl = document.getElementById("manuscript-upload-alert");
+  const zone = document.getElementById("quote-upload-zone");
+  const messageEl = document.getElementById("manuscript-upload-alert-message");
+  const servicesEl = document.getElementById("manuscript-upload-alert-services");
+  alertEl?.classList.add("hidden");
+  zone?.classList.remove("is-required", "is-error");
+  zone?.removeAttribute("aria-invalid");
+  if (messageEl) messageEl.textContent = "";
+  if (servicesEl) servicesEl.textContent = "";
+}
+
+function focusManuscriptUpload({ openPicker = false } = {}) {
+  const zone = document.getElementById("quote-upload-zone");
+  const input = document.getElementById("quote-manuscript-input");
+  zone?.scrollIntoView({ behavior: "smooth", block: "center" });
+  zone?.focus({ preventScroll: true });
+  if (openPicker) {
+    // Allow scroll to settle before opening the system file dialog.
+    window.setTimeout(() => input?.click(), 250);
+  }
+}
+
+function showManuscriptUploadError(services) {
+  const required = getServicesRequiringManuscript(services);
+  if (required.length === 0) {
+    clearManuscriptUploadError();
+    return;
+  }
+
+  const alertEl = document.getElementById("manuscript-upload-alert");
+  const zone = document.getElementById("quote-upload-zone");
+  const messageEl = document.getElementById("manuscript-upload-alert-message");
+  const servicesEl = document.getElementById("manuscript-upload-alert-services");
+  const serviceList = formatServiceList(required);
+
+  if (messageEl) {
+    messageEl.textContent =
+      "Please upload your manuscript before submitting your order. The selected service(s) require a manuscript upload.";
+  }
+  if (servicesEl) {
+    servicesEl.textContent =
+      required.length === 1
+        ? `Required for: ${serviceList}.`
+        : `Required for: ${serviceList}.`;
+  }
+
+  alertEl?.classList.remove("hidden");
+  zone?.classList.add("is-required", "is-error");
+  zone?.setAttribute("aria-invalid", "true");
+
+  showToast(
+    `Please upload your manuscript before submitting your order. Required for ${serviceList}.`,
+    7000
+  );
+  focusManuscriptUpload({ openPicker: false });
 }
 
 function getLanguageTurnaround(tier) {
@@ -450,16 +522,16 @@ function updateSubmitOrderState(services = getSelectedServices()) {
   const submitBtn = document.getElementById("submit-order-btn");
   if (!submitBtn) return;
   const uploadOk = hasRequiredManuscriptUpload(services);
-  submitBtn.disabled = services.length > 0 && !uploadOk;
-  submitBtn.setAttribute(
-    "aria-disabled",
-    services.length > 0 && !uploadOk ? "true" : "false"
-  );
+  // Keep Submit Order clickable so missing-upload validation can show a clear message.
+  submitBtn.disabled = false;
+  submitBtn.setAttribute("aria-disabled", "false");
   if (services.length > 0 && !uploadOk) {
-    submitBtn.title = "Upload a manuscript to submit orders that include non-video services.";
+    submitBtn.title =
+      "Upload a manuscript before submitting. Selected services require a manuscript file.";
   } else {
     submitBtn.removeAttribute("title");
   }
+  if (uploadOk) clearManuscriptUploadError();
 }
 
 function countUniqueCaptionIds(text, pattern) {
@@ -631,6 +703,13 @@ const TIER_LABELS = {
   academic: "Academic",
 };
 
+const VIDEO_LABELS = {
+  abstract: "Video Abstract",
+  short: "Short Take",
+  profile: "Scholar Profile",
+  interview: "Scholar Interview",
+};
+
 function figureEditingEstimate(items, tier = currentEditingTier()) {
   const count = Math.max(0, Number(items) || 0);
   const hasLanguage =
@@ -740,6 +819,7 @@ function renderManuscriptDetection(detection) {
 function applyManuscriptDetection(detection) {
   lastManuscriptDetection = detection;
   figuresCountUserEdited = false;
+  clearManuscriptUploadError();
   const count = Math.max(0, Math.round(Number(detection.words) || 0));
   const bandIndex = bandIndexForWords(count);
 
@@ -1574,7 +1654,9 @@ function calculateQuote() {
   let languageBase = 0;
   let editingCampaignDiscount = 0;
   let figureCost = 0;
+  let figuresBase = 0;
   let layout = 0;
+  let layoutBase = 0;
   let graphical = 0;
   let video = 0;
 
@@ -1587,8 +1669,6 @@ function calculateQuote() {
 
   const editingCampaignActive = editingCampaignDiscount > 0;
 
-  const figuresIncluded = false;
-
   if (services.includes("figures") && figures > 0) {
     const base = figures * RATES.figures.perUnit;
     const discount =
@@ -1596,6 +1676,7 @@ function calculateQuote() {
         ? FIGURE_DISCOUNT[tier] ?? 0
         : 0;
     figureCost = base * (1 - discount);
+    figuresBase = base;
   }
 
   const figureDiscountRate =
@@ -1619,6 +1700,7 @@ function calculateQuote() {
       : 0;
 
   if (services.includes("layout")) {
+    layoutBase = RATES.layout.flat;
     layout = layoutFree
       ? 0
       : RATES.layout.flat * (1 - layoutDiscountRate);
@@ -1628,6 +1710,7 @@ function calculateQuote() {
     graphical = RATES.graphical.flat;
   }
 
+  const videoBase = getVideoBasePrice(videoType);
   if (services.includes("video")) {
     video = getVideoPrice(videoType);
   }
@@ -1675,7 +1758,6 @@ function calculateQuote() {
   setLine("line-graphical", graphical, currency, services.includes("graphical"));
   const videoActive = services.includes("video") && video > 0;
   const videoCampaignActive = videoActive && isVideoCampaignActive();
-  const videoBase = getVideoBasePrice(videoType);
   setLine("line-video", video, currency, videoActive);
   const videoDt = document.getElementById("line-video-label");
   const videoDd = document.getElementById("line-video");
@@ -1710,6 +1792,29 @@ function calculateQuote() {
 
   updateSubmitOrderState(services);
 
+  const lineItems = buildQuoteLineItems({
+    services,
+    tier,
+    words,
+    figures,
+    videoType,
+    language,
+    languageBase,
+    editingCampaignActive,
+    figureCost,
+    figuresBase,
+    figureDiscountRate,
+    layout,
+    layoutBase,
+    layoutFree,
+    layoutDiscountRate,
+    graphical,
+    video,
+    videoBase,
+    videoCampaignActive,
+    ioapDiscount: discount,
+  });
+
   return {
     total,
     currency,
@@ -1724,19 +1829,122 @@ function calculateQuote() {
       editingCampaign: editingCampaignActive,
       editingCampaignDiscount,
       figures: figureCost,
-      figuresIncluded,
+      figuresBase,
+      figuresIncluded: false,
       figuresDiscountRate: figureDiscountRate,
       layout,
+      layoutBase,
       layoutIncluded: layoutFree,
       layoutDiscountRate,
       graphical,
       video,
-      videoCampaign: videoActive && isVideoCampaignActive(),
+      videoBase,
+      videoCampaign: videoCampaignActive,
       subtotal,
       ioapDiscount: discount,
       total,
+      lineItems,
     },
   };
+}
+
+function buildQuoteLineItems({
+  services,
+  tier,
+  words,
+  figures,
+  videoType,
+  language,
+  languageBase,
+  editingCampaignActive,
+  figureCost,
+  figuresBase,
+  figureDiscountRate,
+  layout,
+  layoutBase,
+  layoutFree,
+  layoutDiscountRate,
+  graphical,
+  video,
+  videoBase,
+  videoCampaignActive,
+  ioapDiscount,
+}) {
+  const tierLabel = TIER_LABELS[tier] || tier;
+  const rows = [];
+
+  if (services.includes("language") && (language > 0 || languageBase > 0)) {
+    const row = {
+      id: "language",
+      label: `English Language Editing (${tierLabel}, ${Number(words).toLocaleString()} words)`,
+      amount: language,
+    };
+    if (editingCampaignActive && languageBase > language) {
+      row.wasAmount = languageBase;
+      row.note = "MDPI30 · CHF 30 off";
+    }
+    rows.push(row);
+  }
+
+  if (services.includes("figures") && figures > 0) {
+    const row = {
+      id: "figures",
+      label: `Figure and Table Editing (${figures} item${figures === 1 ? "" : "s"})`,
+      amount: figureCost,
+    };
+    if (figureDiscountRate > 0 && figuresBase > figureCost) {
+      row.wasAmount = figuresBase;
+      row.note = `${Math.round(figureDiscountRate * 100)}% off (${tierLabel})`;
+    }
+    rows.push(row);
+  }
+
+  if (services.includes("layout")) {
+    const row = {
+      id: "layout",
+      label: "Layout Editing",
+      amount: layoutFree ? 0 : layout,
+    };
+    if (layoutFree) {
+      row.note = "Free for MDPI journals";
+    } else if (layoutDiscountRate > 0 && layoutBase > layout) {
+      row.wasAmount = layoutBase;
+      row.note = `${Math.round(layoutDiscountRate * 100)}% off (${tierLabel})`;
+    }
+    rows.push(row);
+  }
+
+  if (services.includes("graphical")) {
+    rows.push({
+      id: "graphical",
+      label: "Graphical Abstract",
+      amount: graphical,
+    });
+  }
+
+  if (services.includes("video") && video > 0) {
+    const row = {
+      id: "video",
+      label: `Video Production (${VIDEO_LABELS[videoType] || videoType})`,
+      amount: video,
+    };
+    if (videoCampaignActive && videoBase > video) {
+      row.wasAmount = videoBase;
+      row.note = "VIDEO10 · 10% off";
+    }
+    rows.push(row);
+  }
+
+  if (ioapDiscount > 0) {
+    rows.push({
+      id: "ioap",
+      label: "IOAP Discount (15% · Language Editing)",
+      amount: -ioapDiscount,
+      isDiscount: true,
+    });
+  }
+
+  return rows;
 }
 
 function buildOrderPayload() {
@@ -1765,16 +1973,25 @@ function buildOrderPayload() {
 function saveOrderAndGoToCheckout() {
   const payload = buildOrderPayload();
   if (!payload) return false;
+  // All selected services share the same checkout gate: account → details → …
   sessionStorage.setItem("mdpi-as-order-v1", JSON.stringify(payload));
-  window.location.href = "checkout.html";
+  let loggedIn = false;
+  try {
+    const auth = JSON.parse(sessionStorage.getItem("mdpi-as-auth-v1") || "null");
+    loggedIn = !!auth?.loggedIn;
+  } catch {
+    loggedIn = false;
+  }
+  // Logged-in authors skip the account step inside checkout; others land on login first.
+  window.location.href = loggedIn ? "checkout.html" : "checkout.html#account";
   return true;
 }
 
-function showToast(message) {
+function showToast(message, durationMs = 4000) {
   toast.textContent = message;
   toast.classList.remove("hidden");
   clearTimeout(showToast._timer);
-  showToast._timer = setTimeout(() => toast.classList.add("hidden"), 4000);
+  showToast._timer = setTimeout(() => toast.classList.add("hidden"), durationMs);
 }
 
 function syncFormState() {
@@ -2737,10 +2954,10 @@ if (form) {
       return;
     }
     if (!hasRequiredManuscriptUpload(services)) {
-      showToast("Upload a manuscript to submit orders that include non-video services.");
-      document.getElementById("quote-upload-zone")?.focus();
+      showManuscriptUploadError(services);
       return;
     }
+    clearManuscriptUploadError();
     if (services.includes("language") && !(Number(form.words.value) > 0)) {
       showToast("Enter the word count for Language Editing.");
       return;
@@ -2762,6 +2979,14 @@ if (form) {
   }
 
   form.addEventListener("submit", handleQuoteSubmit);
+
+  document
+    .getElementById("manuscript-upload-alert-btn")
+    ?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      focusManuscriptUpload({ openPicker: true });
+    });
 
   document.getElementById("check-ioap-btn")?.addEventListener("click", () => {
     document.getElementById("quote").scrollIntoView({ behavior: "smooth" });

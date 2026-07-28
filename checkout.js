@@ -25,7 +25,15 @@ function externalLinkIcon() {
  * On-platform checkout wizard — reads quote payload from sessionStorage.
  */
 const ORDER_STORAGE_KEY = "mdpi-as-order-v1";
+const AUTH_STORAGE_KEY = "mdpi-as-auth-v1";
 const VAT_RATE = 0.081;
+
+/** MDPI SSO login host. Return path is set to this checkout so orders resume after auth. */
+const MDPI_LOGIN_BASE = "https://login.mdpi.com/login";
+const MDPI_REGISTER_URL = "https://susy.mdpi.com/user/register";
+/** Legacy entry URL (kept for reference); runtime login uses getLoginUrl(). */
+const MDPI_LOGIN_URL =
+  "https://login.mdpi.com/login?_target_path=https%3A%2F%2Fwww.mdpi.com%2Fuser%2Flogin%3FauthAll%3Dtrue";
 
 const SERVICE_TITLES = {
   language: "English Language Editing",
@@ -65,7 +73,14 @@ function syncVideoPricing() {
   order.details.videoType = order.videoType;
 }
 
-const CHECKOUT_STEPS = ["details", "invoice", "review", "payment", "confirmation"];
+const CHECKOUT_STEPS = [
+  "account",
+  "details",
+  "invoice",
+  "review",
+  "payment",
+  "confirmation",
+];
 
 const MDPI_JOURNALS = [
   "Accounting and Auditing",
@@ -82,7 +97,7 @@ const MDPI_JOURNALS = [
 ];
 
 let order = null;
-let checkoutStep = "details";
+let checkoutStep = "account";
 let invoiceId = null;
 
 function loadOrder() {
@@ -97,6 +112,70 @@ function loadOrder() {
 
 function saveOrder() {
   sessionStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(order));
+}
+
+function loadAuthState() {
+  try {
+    const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function saveAuthState(state) {
+  sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
+}
+
+function isLoggedIn() {
+  return !!loadAuthState()?.loggedIn;
+}
+
+function markLoggedIn(extra = {}) {
+  const previous = loadAuthState() || {};
+  saveAuthState({
+    ...previous,
+    loggedIn: true,
+    loginPending: false,
+    loggedInAt: new Date().toISOString(),
+    ...extra,
+  });
+}
+
+function getCheckoutReturnUrl() {
+  const url = new URL("checkout.html", window.location.href);
+  url.searchParams.set("auth", "success");
+  url.hash = "";
+  return url.toString();
+}
+
+/**
+ * MDPI login that returns authors to this checkout (order workflow) after authentication.
+ */
+function getLoginUrl() {
+  return `${MDPI_LOGIN_BASE}?_target_path=${encodeURIComponent(getCheckoutReturnUrl())}`;
+}
+
+function beginLoginRedirect() {
+  saveAuthState({
+    ...(loadAuthState() || {}),
+    loginPending: true,
+    loginStartedAt: new Date().toISOString(),
+  });
+  // Keep the quote/order payload; only auth state changes before leaving.
+  saveOrder();
+  window.location.href = getLoginUrl();
+}
+
+function consumeAuthReturnParams() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("auth") !== "success") return false;
+  markLoggedIn({ source: "sso-return" });
+  params.delete("auth");
+  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash || ""}`;
+  window.history.replaceState({}, "", next || window.location.pathname);
+  return true;
 }
 
 function formatMoney(amount, currency = "CHF") {
@@ -126,7 +205,8 @@ function redirectToQuote() {
 }
 
 function getFees() {
-  const net = order.pricing.total;
+  const pricing = order.pricing || {};
+  const net = Number(pricing.total) || 0;
   const vat = net * VAT_RATE;
   const total = net + vat;
   return { net, vat, total };
@@ -141,6 +221,9 @@ function stepIndex(step) {
 }
 
 function setCheckoutStep(step) {
+  if (step !== "account" && step !== "confirmation" && !isLoggedIn()) {
+    step = "account";
+  }
   checkoutStep = step;
   if (step === "review" && !invoiceId) {
     invoiceId = generateInvoiceId();
@@ -252,23 +335,28 @@ function collectReviewFromForm() {
 }
 
 const STEP_META = {
+  account: {
+    eyebrow: "Step 1 of 5",
+    title: "Log in or create an account",
+    desc: "Every order — Language Editing, Figure & Table Editing, Layout Editing, Graphical Abstract, or Video Production — requires an MDPI account before service details.",
+  },
   details: {
-    eyebrow: "Step 1 of 4",
+    eyebrow: "Step 2 of 5",
     title: "Service details",
     desc: "Provide the information our editors and producers need to begin your order.",
   },
   invoice: {
-    eyebrow: "Step 2 of 4",
+    eyebrow: "Step 3 of 5",
     title: "Invoice information",
     desc: "Enter your billing details. Fields marked with * are required.",
   },
   review: {
-    eyebrow: "Step 3 of 4",
+    eyebrow: "Step 4 of 5",
     title: "Review your order",
     desc: "Confirm your services and billing details before payment.",
   },
-    payment: {
-    eyebrow: "Step 4 of 4",
+  payment: {
+    eyebrow: "Step 5 of 5",
     title: "Payment",
     desc: "Choose your preferred payment method and pay securely to complete your order.",
   },
@@ -287,13 +375,14 @@ function renderStepHeader(step) {
 function renderSidebarSummary(options = {}) {
   const { showVat = false, showInvoiceId = false, note = "" } = options;
   const { currency, pricing } = order;
+  const netTotal = Number(pricing?.total) || 0;
   let summaryHtml = "";
 
   if (showVat) {
     summaryHtml = renderFeesSummary();
   } else {
     summaryHtml = renderLineItems();
-    summaryHtml += `<div class="checkout-summary-row is-total"><dt>${t("subtotal")}</dt><dd>${formatMoney(pricing.total, currency)}</dd></div>`;
+    summaryHtml += `<div class="checkout-summary-row is-total"><dt>${t("subtotal")}</dt><dd>${formatMoney(netTotal, currency)}</dd></div>`;
   }
 
   let invoiceBlock = "";
@@ -439,6 +528,7 @@ function renderProgress() {
   if (!list) return;
   const current = stepIndex(checkoutStep);
   const labels = {
+    account: t("stepAccount"),
     details: t("stepDetails"),
     invoice: t("stepInvoice"),
     review: t("stepReview"),
@@ -450,19 +540,28 @@ function renderProgress() {
       const classes = [];
       if (index < current) classes.push("is-done");
       if (step === checkoutStep) classes.push("is-active");
-      const marker = index < current ? "✓" : String(index + 1);
+      // Treat account as complete when the author is already signed in.
+      if (step === "account" && isLoggedIn() && checkoutStep !== "account") {
+        classes.push("is-done");
+      }
+      const marker = index < current || (step === "account" && isLoggedIn() && checkoutStep !== "account")
+        ? "✓"
+        : String(index + 1);
       return `<li class="${classes.join(" ")}" data-step="${step}"><span>${marker}</span>${labels[step]}</li>`;
     })
     .join("");
 }
 
-function renderLineItems() {
-  const { pricing, currency, services, tier, words, figures, videoType } = order;
+function buildSummaryRowsFromPricing(source = order) {
+  const { pricing = {}, services = [], tier, words, figures, videoType } = source || {};
+  const tierLabel = TIER_LABELS[tier] || tier;
   const rows = [];
+
   if (services.includes("language") && (pricing.language > 0 || pricing.languageBase > 0)) {
     const row = {
-      label: `${SERVICE_TITLES.language} (${TIER_LABELS[tier] || tier}, ${words.toLocaleString()} words)`,
-      amount: pricing.language,
+      id: "language",
+      label: `${SERVICE_TITLES.language} (${tierLabel}, ${Number(words || 0).toLocaleString()} words)`,
+      amount: Number(pricing.language) || 0,
     };
     if (pricing.editingCampaign && pricing.languageBase > pricing.language) {
       row.wasAmount = pricing.languageBase;
@@ -470,59 +569,109 @@ function renderLineItems() {
     }
     rows.push(row);
   }
-  if (services.includes("figures") && (pricing.figures > 0 || pricing.figuresIncluded)) {
-    rows.push({
+
+  if (services.includes("figures") && Number(figures) > 0) {
+    const amount = Number(pricing.figures) || 0;
+    const row = {
+      id: "figures",
       label: `${SERVICE_TITLES.figures} (${figures} item${figures === 1 ? "" : "s"})`,
-      amount: pricing.figuresIncluded ? 0 : pricing.figures,
-      note: pricing.figuresIncluded
-        ? "Included (Academic)"
-        : pricing.figuresDiscountRate > 0
-          ? `${Math.round(pricing.figuresDiscountRate * 100)}% off (${TIER_LABELS[tier] || tier})`
-          : null,
-    });
+      amount,
+    };
+    const figuresBase =
+      Number(pricing.figuresBase) ||
+      (pricing.figuresDiscountRate > 0 && amount > 0
+        ? amount / (1 - pricing.figuresDiscountRate)
+        : 0);
+    if (pricing.figuresDiscountRate > 0 && figuresBase > amount) {
+      row.wasAmount = figuresBase;
+      row.note = `${Math.round(pricing.figuresDiscountRate * 100)}% off (${tierLabel})`;
+    }
+    rows.push(row);
   }
-  if (services.includes("layout") && (pricing.layout > 0 || pricing.layoutIncluded)) {
-    rows.push({
+
+  if (services.includes("layout")) {
+    const layoutIncluded = !!pricing.layoutIncluded;
+    const amount = layoutIncluded ? 0 : Number(pricing.layout) || 0;
+    const row = {
+      id: "layout",
       label: SERVICE_TITLES.layout,
-      amount: pricing.layoutIncluded ? 0 : pricing.layout,
-      note: pricing.layoutIncluded
-        ? "Free for MDPI journals"
-        : pricing.layoutDiscountRate > 0
-          ? `${Math.round(pricing.layoutDiscountRate * 100)}% off (${TIER_LABELS[tier] || tier})`
-          : null,
-    });
+      amount,
+    };
+    if (layoutIncluded) {
+      row.note = "Free for MDPI journals";
+    } else if (pricing.layoutDiscountRate > 0) {
+      const layoutBase =
+        Number(pricing.layoutBase) ||
+        (amount > 0 ? amount / (1 - pricing.layoutDiscountRate) : 0);
+      if (layoutBase > amount) row.wasAmount = layoutBase;
+      row.note = `${Math.round(pricing.layoutDiscountRate * 100)}% off (${tierLabel})`;
+    }
+    rows.push(row);
   }
-  if (services.includes("graphical") && pricing.graphical > 0) {
-    rows.push({ label: SERVICE_TITLES.graphical, amount: pricing.graphical });
-  }
-  if (services.includes("video") && pricing.video > 0) {
+
+  if (services.includes("graphical")) {
     rows.push({
-      label: `${SERVICE_TITLES.video} (${VIDEO_LABELS[videoType] || videoType})`,
-      amount: pricing.video,
-      note: pricing.videoCampaign ? "VIDEO10 · 10% off" : null,
+      id: "graphical",
+      label: SERVICE_TITLES.graphical,
+      amount: Number(pricing.graphical) || 0,
     });
   }
+
+  if (services.includes("video")) {
+    const amount = Number(pricing.video) || 0;
+    const row = {
+      id: "video",
+      label: `${SERVICE_TITLES.video} (${VIDEO_LABELS[videoType] || videoType || "Video"})`,
+      amount,
+    };
+    if (pricing.videoCampaign && pricing.videoBase > amount) {
+      row.wasAmount = pricing.videoBase;
+      row.note = "VIDEO10 · 10% off";
+    }
+    rows.push(row);
+  }
+
   if (pricing.ioapDiscount > 0) {
     rows.push({
+      id: "ioap",
       label: "IOAP Discount (15% · Language Editing)",
-      amount: -pricing.ioapDiscount,
+      amount: -Number(pricing.ioapDiscount),
       isDiscount: true,
     });
   }
+
+  return rows;
+}
+
+function getSummaryRows() {
+  const stored = order.pricing?.lineItems;
+  if (Array.isArray(stored) && stored.length > 0) {
+    return stored.map((row) => ({
+      label: row.label,
+      amount: Number(row.amount) || 0,
+      wasAmount: row.wasAmount != null ? Number(row.wasAmount) : undefined,
+      note: row.note || null,
+      isDiscount: !!row.isDiscount,
+    }));
+  }
+  return buildSummaryRowsFromPricing(order);
+}
+
+function renderLineItems() {
+  const { currency } = order;
+  const rows = getSummaryRows();
   return rows
     .map((row) => {
       let value;
-      if (row.note && row.amount === 0 && !row.wasAmount) {
-        value = row.note;
-      } else if (row.wasAmount && row.wasAmount > row.amount) {
+      if (row.isDiscount) {
+        value = `−${formatMoney(Math.abs(row.amount), currency)}`;
+      } else if (row.wasAmount != null && row.wasAmount > row.amount) {
         value = `<span class="price-was">${formatMoney(row.wasAmount, currency)}</span> ${formatMoney(row.amount, currency)}`;
         if (row.note) {
           value += ` <span class="checkout-line-note">${escapeHtml(row.note)}</span>`;
         }
-      } else if (row.isDiscount) {
-        value = `−${formatMoney(Math.abs(row.amount), currency)}`;
-      } else if (row.note && row.amount === 0) {
-        value = row.note;
+      } else if (row.note && !(row.amount > 0)) {
+        value = escapeHtml(row.note);
       } else if (row.note) {
         value = `${formatMoney(row.amount, currency)} <span class="checkout-line-note">${escapeHtml(row.note)}</span>`;
       } else {
@@ -533,11 +682,45 @@ function renderLineItems() {
     .join("");
 }
 
-function renderCountrySelect(selected = "") {
-  if (window.MdpiCountries?.renderCountryOptions) {
-    return `<select id="invoice-country" autocomplete="country-name">${window.MdpiCountries.renderCountryOptions(selected)}</select>`;
+function normalizeOrderPricing(rawOrder) {
+  if (!rawOrder?.pricing) return rawOrder;
+
+  const pricing = { ...rawOrder.pricing };
+  const hadStaleFiguresIncluded = !!pricing.figuresIncluded;
+  // Academic figures are discounted, never free — drop stale "included" flags.
+  pricing.figuresIncluded = false;
+
+  const normalized = { ...rawOrder, pricing };
+  const rows = buildSummaryRowsFromPricing(normalized);
+  const hasSnapshot = Array.isArray(pricing.lineItems) && pricing.lineItems.length > 0;
+
+  // Rebuild when missing, or when an older payload marked figures as freely included.
+  if (!hasSnapshot || hadStaleFiguresIncluded) {
+    pricing.lineItems = rows;
+  } else {
+    // Ensure every selected service still appears if an older snapshot omitted it.
+    const existingLabels = new Set(pricing.lineItems.map((row) => row.label));
+    for (const row of rows) {
+      if (!existingLabels.has(row.label)) {
+        pricing.lineItems.push(row);
+        existingLabels.add(row.label);
+      }
+    }
   }
-  return `<select id="invoice-country" autocomplete="country-name"><option value="">Select country</option></select>`;
+
+  const storedTotal = Number(pricing.total) || 0;
+  const lineSum = (pricing.lineItems || []).reduce(
+    (sum, row) => sum + (Number(row.amount) || 0),
+    0
+  );
+
+  // Prefer the frozen quote total when present; only backfill from lines if missing.
+  if (!(storedTotal > 0) && lineSum > 0) {
+    pricing.total = lineSum;
+    pricing.subtotal = lineSum + (Number(pricing.ioapDiscount) || 0);
+  }
+
+  return { ...rawOrder, pricing };
 }
 
 function renderFeesSummary() {
@@ -546,9 +729,80 @@ function renderFeesSummary() {
   return `
     ${renderLineItems()}
     <div class="checkout-summary-row"><dt>Subtotal without VAT</dt><dd>${formatMoney(net, currency)}</dd></div>
-    <div class="checkout-summary-row"><dt>VAT</dt><dd>${formatMoney(vat, currency)}</dd></div>
+    <div class="checkout-summary-row"><dt>VAT (8.1%)</dt><dd>${formatMoney(vat, currency)}</dd></div>
     <div class="checkout-summary-row is-total"><dt>Total with VAT</dt><dd>${formatMoney(total, currency)}</dd></div>
   `;
+}
+
+function renderCountrySelect(selected = "") {
+  if (window.MdpiCountries?.renderCountryOptions) {
+    return `<select id="invoice-country" autocomplete="country-name">${window.MdpiCountries.renderCountryOptions(selected)}</select>`;
+  }
+  return `<select id="invoice-country" autocomplete="country-name"><option value="">Select country</option></select>`;
+}
+
+function renderAccountStep() {
+  const loggedIn = isLoggedIn();
+  const auth = loadAuthState();
+  const serviceCount = order?.services?.length || 0;
+  const serviceLabel =
+    serviceCount === 1 ? "1 selected service" : `${serviceCount} selected services`;
+
+  if (loggedIn) {
+    return `
+      ${renderStepHeader("account")}
+      <section class="checkout-account-card is-signed-in">
+        <div class="checkout-account-status" role="status">
+          <span class="checkout-account-status-icon" aria-hidden="true">✓</span>
+          <div>
+            <h2>You're signed in</h2>
+            <p>Your MDPI account is connected. Continue to enter details for your ${escapeHtml(serviceLabel)}.</p>
+            ${auth?.email ? `<p class="form-hint">${escapeHtml(auth.email)}</p>` : ""}
+          </div>
+        </div>
+        <div class="checkout-actions">
+          <button type="button" class="btn btn-outline" data-checkout-back="quote">← Edit quote</button>
+          <div class="checkout-actions-end">
+            <button type="button" class="btn btn-primary" data-checkout-next="details">Continue to service details</button>
+          </div>
+        </div>
+      </section>`;
+  }
+
+  return `
+    ${renderStepHeader("account")}
+    <section class="checkout-account-card">
+      <p class="checkout-account-lead">
+        You submitted an order with <strong>${escapeHtml(serviceLabel)}</strong>.
+        Log in with your MDPI account to continue — or create an account if you are new to MDPI.
+        After authentication you will return here to finish the remaining checkout steps.
+      </p>
+      <div class="checkout-account-actions">
+        <button type="button" class="btn btn-primary" id="checkout-login-btn">
+          Log In
+        </button>
+        <a
+          class="btn btn-outline"
+          id="checkout-register-btn"
+          href="${escapeHtml(MDPI_REGISTER_URL)}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Create an Account
+        </a>
+      </div>
+      <p class="checkout-account-hint" id="checkout-account-hint">
+        Log In opens the MDPI sign-in page. When sign-in succeeds, you are returned to this order to continue with service details.
+      </p>
+      <div class="checkout-actions">
+        <button type="button" class="btn btn-outline" data-checkout-back="quote">← Edit quote</button>
+        <div class="checkout-actions-end">
+          <button type="button" class="btn btn-primary" id="checkout-auth-continue" data-checkout-next="details">
+            Continue to service details
+          </button>
+        </div>
+      </div>
+    </section>`;
 }
 
 function renderDetailsStep() {
@@ -656,7 +910,7 @@ function renderDetailsStep() {
   const body = `
     ${renderStepHeader("details")}
     ${blocks}
-    ${renderActions("quote", "← Edit quote", "invoice", "Continue to invoice")}`;
+    ${renderActions("account", "← Back to account", "invoice", "Continue to invoice")}`;
 
   return wrapCheckoutLayout("details", body, {
     note: "Complete each service section, then continue to billing.",
@@ -883,6 +1137,7 @@ function renderCheckout() {
   renderProgress();
 
   const panels = {
+    account: renderAccountStep,
     details: renderDetailsStep,
     invoice: renderInvoiceStep,
     review: renderReviewStep,
@@ -912,6 +1167,13 @@ function bindCheckoutEvents() {
   document.querySelectorAll("[data-checkout-next]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const target = btn.getAttribute("data-checkout-next");
+      if (checkoutStep === "account") {
+        if (!isLoggedIn()) {
+          alert("Please log in or create an MDPI account before continuing.");
+          document.getElementById("checkout-login-btn")?.focus();
+          return;
+        }
+      }
       if (checkoutStep === "details") {
         collectDetailsFromForm();
         if (!validateDetails()) return;
@@ -927,6 +1189,41 @@ function bindCheckoutEvents() {
       setCheckoutStep(target);
     });
   });
+
+  document.getElementById("checkout-login-btn")?.addEventListener("click", () => {
+    beginLoginRedirect();
+  });
+
+  document.getElementById("checkout-register-btn")?.addEventListener("click", () => {
+    saveAuthState({
+      ...(loadAuthState() || {}),
+      registerStartedAt: new Date().toISOString(),
+      loginPending: true,
+    });
+  });
+
+  // If the author started login and returned without an SSO callback (e.g. local demo), confirm manually.
+  if (checkoutStep === "account" && !isLoggedIn() && loadAuthState()?.loginPending) {
+    const hint = document.getElementById("checkout-account-hint");
+    if (hint) {
+      hint.innerHTML =
+        "Welcome back. If you finished signing in with MDPI, confirm below to continue your order.";
+    }
+    const actionsEnd = document.querySelector(".checkout-account-card .checkout-actions-end");
+    if (actionsEnd && !document.getElementById("checkout-confirm-login")) {
+      const confirmBtn = document.createElement("button");
+      confirmBtn.type = "button";
+      confirmBtn.className = "btn btn-primary";
+      confirmBtn.id = "checkout-confirm-login";
+      confirmBtn.textContent = "I've logged in — continue";
+      confirmBtn.addEventListener("click", () => {
+        markLoggedIn({ source: "login-return" });
+        setCheckoutStep("details");
+      });
+      actionsEnd.innerHTML = "";
+      actionsEnd.appendChild(confirmBtn);
+    }
+  }
 
   document.getElementById("apply-voucher-btn")?.addEventListener("click", () => {
     collectInvoiceFromForm();
@@ -977,18 +1274,29 @@ function bindCheckoutEvents() {
 }
 
 function initCheckout() {
-  order = loadOrder();
-  if (!order || !order.services?.length || !order.pricing?.total) {
+  order = normalizeOrderPricing(loadOrder());
+  if (!order || !order.services?.length || !(Number(order.pricing?.total) > 0)) {
     redirectToQuote();
     return;
   }
   order.details = order.details || {};
   order.invoice = order.invoice || {};
   order.review = order.review || {};
+  // Persist normalized pricing so totals stay stable across checkout steps.
+  saveOrder();
   invoiceId = order.invoiceId || null;
+
+  const returnedFromAuth = consumeAuthReturnParams();
   if (order.status === "paid") {
     checkoutStep = "confirmation";
+  } else if (returnedFromAuth || isLoggedIn()) {
+    // Authenticated authors skip the login gate for any selected service mix.
+    checkoutStep = "details";
+  } else {
+    // Submit Order always lands here first when not signed in.
+    checkoutStep = "account";
   }
+
   renderCheckout();
 }
 
