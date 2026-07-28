@@ -3316,11 +3316,44 @@ if (!document.getElementById("quote-form")) {
 
 (function initUxChrome() {
   const header = document.querySelector(".site-header");
+  const backToTop = document.getElementById("back-to-top");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const scrollToTop = () => {
+    const topEl = document.getElementById("top");
+    if (reduceMotion) {
+      window.scrollTo(0, 0);
+      topEl?.focus?.({ preventScroll: true });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const onScroll = () => {
-    header?.classList.toggle("is-scrolled", window.scrollY > 8);
+    const y = window.scrollY || document.documentElement.scrollTop;
+    header?.classList.toggle("is-scrolled", y > 8);
+    if (backToTop) {
+      const show = y > 480;
+      backToTop.classList.toggle("is-visible", show);
+      backToTop.setAttribute("aria-hidden", show ? "false" : "true");
+      backToTop.tabIndex = show ? 0 : -1;
+    }
   };
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
+
+  backToTop?.addEventListener("click", (event) => {
+    event.preventDefault();
+    scrollToTop();
+  });
+
+  document.querySelectorAll('a[href="#top"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      scrollToTop();
+      history.replaceState(null, "", "#top");
+    });
+  });
 
   const sectionIds = ["services", "additional-services", "quote", "faqs"];
   const navLinks = Array.from(document.querySelectorAll(".main-nav a[href^='#']"));
