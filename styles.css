@@ -660,34 +660,62 @@ a:hover {
 
 /* Hero */
 .hero {
+  position: relative;
   background: linear-gradient(180deg, var(--white) 0%, #f8fbfc 100%);
   padding: 0;
   overflow: hidden;
 }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0;
-  align-items: stretch;
-  width: 100%;
-  max-width: none;
-  min-height: min(36rem, 78vh);
+/* Full-bleed split atmosphere; content aligns to .container width */
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.hero-content-wrap {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.25rem, 3vw, 2.5rem) clamp(2.5rem, 5vw, 4.5rem) var(--page-inline);
+.hero::before {
+  left: 0;
   background:
     radial-gradient(ellipse 80% 60% at 12% 20%, rgba(127, 211, 201, 0.18), transparent 55%),
     linear-gradient(180deg, var(--white) 0%, #f8fbfc 100%);
 }
 
+.hero::after {
+  right: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 88% 12%, rgba(255, 255, 255, 0.55), transparent 52%),
+    linear-gradient(155deg, #d9ebf8 0%, #cfe4ef 42%, #b9d8e4 100%);
+  border-left: 1px solid rgba(27, 50, 82, 0.08);
+}
+
+.hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+  align-items: stretch;
+  width: min(100% - (2 * var(--page-gutter)), var(--max-width));
+  margin-inline: auto;
+  min-height: min(36rem, 78vh);
+}
+
+.hero-content-wrap {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: clamp(2.5rem, 5vw, 4.5rem) 0;
+  background: transparent;
+}
+
 .hero-content {
   width: 100%;
-  max-width: calc(var(--max-width) / 2 - 0.5rem);
+  max-width: none;
 }
 
 .eyebrow {
@@ -3499,9 +3527,17 @@ a:hover {
     min-height: 0;
   }
 
+  .hero::before,
+  .hero::after {
+    display: none;
+  }
+
   .hero-content-wrap {
     justify-content: flex-start;
-    padding-inline: var(--page-inline);
+    padding-inline: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 12% 20%, rgba(127, 211, 201, 0.18), transparent 55%),
+      linear-gradient(180deg, var(--white) 0%, #f8fbfc 100%);
   }
 
   .hero-content {

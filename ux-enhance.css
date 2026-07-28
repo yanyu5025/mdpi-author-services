@@ -1783,12 +1783,9 @@ html {
   justify-content: center;
   gap: 1.1rem;
   min-height: 100%;
-  padding: clamp(1.75rem, 4vw, 3rem) var(--page-inline) clamp(1.75rem, 4vw, 3rem)
-    clamp(1.25rem, 3.5vw, 3.25rem);
-  background:
-    radial-gradient(ellipse 70% 55% at 88% 12%, rgba(255, 255, 255, 0.55), transparent 52%),
-    linear-gradient(155deg, #d9ebf8 0%, #cfe4ef 42%, #b9d8e4 100%);
-  border-left: 1px solid rgba(27, 50, 82, 0.08);
+  padding: clamp(1.75rem, 4vw, 3rem) 0;
+  background: transparent;
+  border-left: 0;
 }
 
 .campaign-slides {
@@ -1937,6 +1934,10 @@ html {
     border-left: 0;
     border-top: 1px solid rgba(27, 50, 82, 0.08);
     min-height: 0;
+    padding-block: clamp(1.75rem, 4vw, 2.5rem);
+    background:
+      radial-gradient(ellipse 70% 55% at 88% 12%, rgba(255, 255, 255, 0.55), transparent 52%),
+      linear-gradient(155deg, #d9ebf8 0%, #cfe4ef 42%, #b9d8e4 100%);
   }
 
   .campaign-figure-examples {
