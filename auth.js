@@ -101,6 +101,7 @@
   }
 
   function renderHeaderAuthHtml() {
+    const t = (key, fallback) => window.MdpiI18n?.t?.(key) || fallback || key;
     if (isLoggedIn()) {
       const auth = loadAuthState() || {};
       const name = getDisplayName(auth);
@@ -127,7 +128,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              Submission History
+              ${escapeHtml(t("submissionHistory", "Submission History"))}
               <svg class="icon-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
             <button
@@ -136,7 +137,7 @@
               role="menuitem"
               id="header-logout-btn"
             >
-              Log out
+              ${escapeHtml(t("logOut", "Log out"))}
             </button>
           </div>
         </div>`;
@@ -144,7 +145,7 @@
 
     return `
       <button type="button" class="btn btn-outline btn-sm header-login-btn" id="header-login-btn">
-        Log In
+        ${escapeHtml(t("logIn", "Log In"))}
       </button>`;
   }
 

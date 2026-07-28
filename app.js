@@ -131,10 +131,18 @@ const VIDEO_CAMPAIGN = {
 };
 
 const VIDEO_TYPE_LABELS = {
-  abstract: "Video Abstract",
-  short: "Short Take",
-  profile: "Scholar Profile",
-  interview: "Scholar Interview",
+  get abstract() {
+    return window.MdpiI18n?.t?.("videoAbstract") || "Video Abstract";
+  },
+  get short() {
+    return window.MdpiI18n?.t?.("shortTake") || "Short Take";
+  },
+  get profile() {
+    return window.MdpiI18n?.t?.("scholarProfile") || "Scholar Profile";
+  },
+  get interview() {
+    return window.MdpiI18n?.t?.("scholarInterview") || "Scholar Interview";
+  },
 };
 
 function getVideoTypeValue() {
@@ -226,16 +234,19 @@ function formatDisplayPrice(amount) {
 
 function formatWordRange(index) {
   const ranges = [
-    "1,000 – 2,000 words",
-    "2,001 – 4,000 words",
-    "4,001 – 6,000 words",
-    "6,001 – 8,000 words",
-    "8,001 – 10,000 words",
-    "10,001 – 12,000 words",
-    "12,001 – 15,000 words",
-    "15,001+ words",
+    [1000, 2000],
+    [2001, 4000],
+    [4001, 6000],
+    [6001, 8000],
+    [8001, 10000],
+    [10001, 12000],
+    [12001, 15000],
+    [15001, null],
   ];
-  return ranges[index] ?? ranges[0];
+  const pair = ranges[index] || ranges[0];
+  const unit = tUI("wordsUnit", "words");
+  if (pair[1] == null) return `${pair[0].toLocaleString()}+ ${unit}`;
+  return `${pair[0].toLocaleString()} – ${pair[1].toLocaleString()} ${unit}`;
 }
 
 function shortBandLabel(index) {
@@ -278,7 +289,7 @@ function updateTierCardPrices(bandIndex) {
     window.setTimeout(() => amountEl.classList.remove("is-updating"), 220);
 
     if (captionEl) {
-      captionEl.textContent = isStarting ? "From" : "This band";
+      captionEl.textContent = isStarting ? tUI("priceFrom", "From") : tUI("priceThisBand", "This band");
     }
   });
 }
@@ -297,10 +308,9 @@ function setWordCountBand(index, { syncForm = true } = {}) {
   }
   if (rangeEl) rangeEl.textContent = formatWordRange(bandIndex);
   if (hintEl) {
-    hintEl.textContent =
-      bandIndex === 0
-        ? "Starting prices shown"
-        : "Prices update for all tiers below";
+    hintEl.textContent = bandIndex === 0
+        ? tUI("wordCountStarting", "Starting prices shown")
+        : tUI("wordCountBandPrices", "Prices update for all tiers below");
   }
 
   if (bands) {
@@ -677,17 +687,35 @@ function figureDiscountLabel(tier, rate) {
 }
 
 const TIER_LABELS = {
-  standard: "Standard",
-  rapid: "Rapid",
-  academic: "Academic",
+  get standard() {
+    return window.MdpiI18n?.t?.("tierStandard") || "Standard";
+  },
+  get rapid() {
+    return window.MdpiI18n?.t?.("tierRapid") || "Rapid";
+  },
+  get academic() {
+    return window.MdpiI18n?.t?.("tierAcademic") || "Academic";
+  },
 };
 
 const VIDEO_LABELS = {
-  abstract: "Video Abstract",
-  short: "Short Take",
-  profile: "Scholar Profile",
-  interview: "Scholar Interview",
+  get abstract() {
+    return window.MdpiI18n?.t?.("videoAbstract") || "Video Abstract";
+  },
+  get short() {
+    return window.MdpiI18n?.t?.("shortTake") || "Short Take";
+  },
+  get profile() {
+    return window.MdpiI18n?.t?.("scholarProfile") || "Scholar Profile";
+  },
+  get interview() {
+    return window.MdpiI18n?.t?.("scholarInterview") || "Scholar Interview";
+  },
 };
+
+function tUI(key, fallback = "") {
+  return window.MdpiI18n?.t?.(key) || fallback || key;
+}
 
 function figureEditingEstimate(items, tier = currentEditingTier()) {
   const count = Math.max(0, Number(items) || 0);
@@ -1583,16 +1611,16 @@ function updateQuoteUx(services, total, currency) {
   const sub = document.getElementById("price-panel-sub");
   if (!sub) return;
   if (!hasServices) {
-    sub.textContent = "Upload a document or select a service to begin";
+    sub.textContent = tUI("estimateUploadOrSelect", "Upload a document or select a service to begin");
   } else if (!hasEstimate) {
-    sub.textContent = "Add details below to calculate price";
+    sub.textContent = tUI("estimateAddDetails", "Add details below to calculate price");
   } else {
     const labels = {
-      language: "Language",
-      figures: "Figures",
-      layout: "Layout",
-      graphical: "Graphical",
-      video: "Video",
+      language: tUI("serviceLanguage", "Language"),
+      figures: tUI("serviceFigures", "Figures"),
+      layout: tUI("serviceLayout", "Layout"),
+      graphical: tUI("serviceGraphical", "Graphical"),
+      video: tUI("serviceVideo", "Video"),
     };
     const names = services.map((s) => labels[s] || s).join(" · ");
     sub.textContent = `${names} · ${formatMoney(total, currency)}`;
@@ -1705,8 +1733,8 @@ function calculateQuote() {
   const languageDd = document.getElementById("line-language");
   if (languageDt) {
     languageDt.textContent = editingCampaignActive
-      ? "Language Editing (MDPI30 · CHF 30 off)"
-      : "Language Editing";
+      ? tUI("languageEditingMdpi30", "Language Editing (MDPI30 · CHF 30 off)")
+      : tUI("serviceLanguage", "Language Editing");
   }
   if (languageDd && (language > 0 || languageBase > 0) && editingCampaignActive && languageBase > language) {
     languageDd.innerHTML = `<span class="price-was">${formatMoney(languageBase, currency)}</span> ${formatMoney(language, currency)}`;
@@ -1729,7 +1757,7 @@ function calculateQuote() {
     currency,
     services.includes("layout"),
     layoutFree
-      ? "Free for MDPI journals"
+      ? tUI("freeForMdpiJournals", "Free for MDPI journals")
       : layoutDiscountRate > 0
         ? `${Math.round(layoutDiscountRate * 100)}% off (${TIER_LABELS[tier] || tier})`
         : null
@@ -1742,8 +1770,8 @@ function calculateQuote() {
   const videoDd = document.getElementById("line-video");
   if (videoDt) {
     videoDt.textContent = videoCampaignActive
-      ? "Video Production (VIDEO10 · 10% off)"
-      : "Video Production";
+      ? tUI("videoProductionVideo10", "Video Production (VIDEO10 · 10% off)")
+      : tUI("serviceVideo", "Video Production");
   }
   if (videoDd && videoActive && videoCampaignActive && videoBase > video) {
     videoDd.innerHTML = `<span class="price-was">${formatMoney(videoBase, currency)}</span> ${formatMoney(video, currency)}`;
@@ -2365,7 +2393,7 @@ function toggleLanguageTierSelection(tier) {
     cancelCompanionScroll();
     setServiceChecked("language", false);
     syncFormState();
-    showToast("Language editing deselected.");
+    showToast(tUI("languageDeselected", "Language editing deselected."));
     return;
   }
 
@@ -3227,8 +3255,15 @@ if (form) {
   });
 
   window.addEventListener("mdpi-language-change", () => {
+    window.MdpiI18n?.applyTranslations?.();
+    const slider = document.getElementById("word-count-slider");
+    if (slider) setWordCountBand(Number(slider.value) || 0, { syncForm: false });
+    updateVideoTypeOptions();
+    renderAddonPrices();
+    renderVideoCampaignPrices();
     syncFormState();
     calculateQuote();
+    window.MdpiAuth?.renderHeaderAuth?.();
   });
 }
 
