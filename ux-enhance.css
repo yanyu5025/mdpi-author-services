@@ -476,6 +476,15 @@ html {
   gap: 1.5rem;
 }
 
+.services-section .editing-companion-grid {
+  gap: 1.35rem;
+  margin-top: 0;
+}
+
+.services-section .editing-companion-panel {
+  margin-top: 2.25rem;
+}
+
 .service-card-head {
   display: flex;
   align-items: flex-start;
@@ -562,7 +571,9 @@ html {
   margin-top: auto;
 }
 
-.addon-grid {
+.addon-grid,
+.addon-grid-two,
+.editing-companion-grid {
   gap: 1.35rem;
 }
 

@@ -60,7 +60,7 @@ TOPICS = [
         "tab": "Figures & Tables",
         "title": "Figure &amp; Table Editing FAQs",
         "description": "What’s included in figure and table editing, pricing, turnaround, and free re-editing.",
-        "home_anchor": "../index.html#additional-services",
+        "home_anchor": "../index.html#figure-table-editing",
         "items": [
             (
                 "What is included in the Figure and Table Editing service?",
@@ -104,7 +104,7 @@ TOPICS = [
         "tab": "Layout Editing",
         "title": "Layout Editing FAQs",
         "description": "MDPI house-style layout editing, inclusions, and Academic bundle benefits.",
-        "home_anchor": "../index.html#additional-services",
+        "home_anchor": "../index.html#layout-editing",
         "items": [
             (
                 "What is included in the Layout Editing service?",

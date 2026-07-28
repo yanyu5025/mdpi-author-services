@@ -1867,19 +1867,25 @@ function syncFormState() {
   if (layoutSelectedRow) {
     layoutSelectedRow.classList.toggle("hidden", !layoutIncludedByE3);
   }
-  layoutOptInRow?.classList.toggle("hidden", isAcademic || !hasLanguage);
+  layoutOptInRow?.classList.toggle(
+    "hidden",
+    layoutIncludedByE3 || (!hasLanguage && !layoutNowSelected)
+  );
   const layoutIncludedCheck = document.getElementById("layout-included-check");
   if (layoutIncludedCheck) layoutIncludedCheck.checked = layoutIncludedByE3;
   if (quoteIncludeLayout) {
-    quoteIncludeLayout.disabled = isAcademic;
-    quoteIncludeLayout.checked = isAcademic
-      ? layoutIncludedByE3
-      : layoutSelectiveOptIn;
+    quoteIncludeLayout.disabled = isAcademic && hasLanguage;
+    quoteIncludeLayout.checked = layoutIncludedByE3
+      ? true
+      : layoutSelectiveOptIn || (!hasLanguage && layoutNowSelected);
   }
-  if (layoutOptInText && !isAcademic) {
-    const layoutDiscountPct = Math.round((LAYOUT_DISCOUNT[tier] ?? 0) * 100);
-    const layoutPriceNote =
-      layoutDiscountPct > 0
+  if (layoutOptInText && !layoutIncludedByE3) {
+    const layoutDiscountPct = hasLanguage
+      ? Math.round((LAYOUT_DISCOUNT[tier] ?? 0) * 100)
+      : 0;
+    const layoutPriceNote = !hasLanguage
+      ? `CHF ${RATES.layout.flat.toFixed(2)} per submission`
+      : layoutDiscountPct > 0
         ? `${layoutDiscountPct}% off with ${TIER_LABELS[tier]} · was CHF ${RATES.layout.flat.toFixed(2)}`
         : `Optional with ${tier === "standard" ? "Standard" : "Rapid"} · CHF ${RATES.layout.flat.toFixed(2)} per submission`;
     layoutOptInText.innerHTML = `Add Layout Editing<small>${layoutPriceNote}</small>`;
@@ -1935,8 +1941,9 @@ function syncFormState() {
 
   if (figureOptInRow && quoteIncludeFigures) {
     const showFigurePanel =
-      hasLanguage &&
-      (isAcademic || hasFigureItems || figuresNowSelected || hasDetectedFigures);
+      figuresNowSelected ||
+      (hasLanguage &&
+        (isAcademic || hasFigureItems || hasDetectedFigures));
     figureOptInRow.classList.toggle("hidden", !showFigurePanel);
 
     figureOptInRow.classList.toggle("is-locked", false);
@@ -1945,9 +1952,13 @@ function syncFormState() {
     quoteIncludeFigures.checked = figuresSelectiveOptIn || hasFigures;
 
     const tierShort = TIER_LABELS[tier] || tier;
-    const discountPct = Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100);
+    const discountPct = hasLanguage
+      ? Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100)
+      : 0;
     let detectedSummary;
-    if (hasDetectedFigures) {
+    if (!hasLanguage) {
+      detectedSummary = `CHF ${RATES.figures.perUnit.toFixed(0)} per item`;
+    } else if (hasDetectedFigures) {
       detectedSummary = `Detected ${lastManuscriptDetection.figures} figure${lastManuscriptDetection.figures === 1 ? "" : "s"} and ${lastManuscriptDetection.tables} table${lastManuscriptDetection.tables === 1 ? "" : "s"} · optional${discountPct > 0 ? ` · ${discountPct}% off with ${tierShort}` : ` · full price with ${tierShort}`}`;
     } else if (isAcademic) {
       detectedSummary = "Optional with Academic · 50% off with language editing";
@@ -2010,12 +2021,297 @@ function syncFormState() {
   }
 
   updateAcademicRecommendation(hasLanguage, tier);
+  updateCompanionServiceCards(hasLanguage, tier, isAcademic);
   updateVideoTypeOptions();
   renderVideoCampaignPrices();
   updateFiguresHighCountNote();
   updateSubmitOrderState(getSelectedServices());
 
   calculateQuote();
+}
+
+function companionServiceSelected(service) {
+  if (service === "figures") {
+    return getSelectedServices().includes("figures");
+  }
+  if (service === "layout") {
+    return (
+      getSelectedServices().includes("layout") ||
+      (getSelectedServices().includes("language") && isAcademicTier())
+    );
+  }
+  if (service === "graphical" || service === "video") {
+    return getSelectedServices().includes(service);
+  }
+  return false;
+}
+
+function companionServiceLabel(service) {
+  if (service === "figures") return "Figure & Table Editing";
+  if (service === "layout") return "Layout Editing";
+  if (service === "graphical") return "Graphical Abstract";
+  if (service === "video") return "Video Production";
+  return service;
+}
+
+function companionServiceLocked(service) {
+  return (
+    service === "layout" &&
+    getSelectedServices().includes("language") &&
+    isAcademicTier()
+  );
+}
+
+function updateCompanionServiceCards(hasLanguage, tier, isAcademic) {
+  const figurePerk = document.getElementById("figures-companion-perk");
+  const layoutPerk = document.getElementById("layout-companion-perk");
+  const figureDiscountPct = Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100);
+  const layoutDiscountPct = Math.round((LAYOUT_DISCOUNT[tier] ?? 0) * 100);
+  const quoteHint = document.getElementById("companion-get-quote-hint");
+
+  if (figurePerk) {
+    if (hasLanguage && figureDiscountPct > 0) {
+      figurePerk.hidden = false;
+      figurePerk.textContent = `${figureDiscountPct}% off when bundled with ${TIER_LABELS[tier]} Language Editing.`;
+    } else if (hasLanguage) {
+      figurePerk.hidden = false;
+      figurePerk.textContent = `Optional add-on with ${TIER_LABELS[tier]} Language Editing.`;
+    } else {
+      figurePerk.hidden = true;
+      figurePerk.textContent = "";
+    }
+  }
+
+  if (layoutPerk) {
+    if (hasLanguage && isAcademic) {
+      layoutPerk.hidden = false;
+      layoutPerk.textContent = "Free with Academic Language Editing for MDPI journals.";
+    } else if (hasLanguage && layoutDiscountPct > 0) {
+      layoutPerk.hidden = false;
+      layoutPerk.textContent = `${layoutDiscountPct}% off when bundled with ${TIER_LABELS[tier]} Language Editing.`;
+    } else if (hasLanguage) {
+      layoutPerk.hidden = false;
+      layoutPerk.textContent = `Optional add-on with ${TIER_LABELS[tier]} Language Editing.`;
+    } else {
+      layoutPerk.hidden = true;
+      layoutPerk.textContent = "";
+    }
+  }
+
+  document.querySelectorAll(".select-companion").forEach((input) => {
+    const service = input.dataset.companionService;
+    const selected = companionServiceSelected(service);
+    const locked = companionServiceLocked(service);
+    const card = input.closest(".editing-companion-card");
+    const check = input.closest(".editing-companion-check");
+    const title = check?.querySelector(".companion-check-title");
+    const hint = check?.querySelector(".companion-check-hint");
+    card?.classList.toggle("is-selected", selected);
+    input.checked = selected;
+    input.disabled = locked;
+    if (service === "figures") {
+      if (title) title.textContent = "Add Figure & Table Editing";
+      if (hint) {
+        hint.textContent = selected
+          ? "Selected for your quote"
+          : "Add to your quote";
+      }
+      input.setAttribute(
+        "aria-label",
+        selected
+          ? "Figure and Table Editing selected for your quote"
+          : "Add Figure and Table Editing to your quote"
+      );
+      if (check) {
+        check.title = selected
+          ? "Figure & Table Editing selected"
+          : "Add Figure & Table Editing to your quote";
+      }
+    } else if (service === "layout") {
+      if (title) {
+        title.textContent = locked
+          ? "Layout Editing included"
+          : "Add Layout Editing";
+      }
+      if (hint) {
+        hint.textContent = locked
+          ? "Included free with Academic for MDPI journals"
+          : selected
+            ? "Selected for your quote"
+            : "Add to your quote";
+      }
+      input.setAttribute(
+        "aria-label",
+        locked
+          ? "Layout Editing included free with Academic"
+          : selected
+            ? "Layout Editing selected for your quote"
+            : "Add Layout Editing to your quote"
+      );
+      if (check) {
+        check.title = locked
+          ? "Included with Academic"
+          : selected
+            ? "Layout Editing selected"
+            : "Add Layout Editing to your quote";
+      }
+    } else if (service === "graphical" || service === "video") {
+      const label = companionServiceLabel(service);
+      if (title) title.textContent = `Add ${label}`;
+      if (hint) {
+        hint.textContent = selected
+          ? "Selected for your quote"
+          : "Add to your quote";
+      }
+      input.setAttribute(
+        "aria-label",
+        selected ? `${label} selected for your quote` : `Add ${label} to your quote`
+      );
+      if (check) {
+        check.title = selected
+          ? `${label} selected`
+          : `Add ${label} to your quote`;
+      }
+    }
+  });
+
+  if (quoteHint) {
+    const selectedCompanions = ["figures", "layout"].filter((service) =>
+      companionServiceSelected(service)
+    );
+    if (!hasLanguage && selectedCompanions.length === 0) {
+      quoteHint.textContent =
+        "Tick Figure & Table Editing and/or Layout Editing, or select a language editing tier, then continue to your quote.";
+    } else if (!hasLanguage) {
+      const names = selectedCompanions.map(companionServiceLabel);
+      quoteHint.textContent = `Continue with ${names.join(" and ")}.`;
+    } else if (selectedCompanions.length === 0) {
+      quoteHint.textContent = `Continue with ${TIER_LABELS[tier]} Language Editing, or tick the services above to add them first.`;
+    } else {
+      const names = selectedCompanions.map(companionServiceLabel);
+      quoteHint.textContent = `Continue with ${TIER_LABELS[tier]} Language Editing plus ${names.join(" and ")}.`;
+    }
+  }
+
+  const addonHint = document.getElementById("addon-get-quote-hint");
+  if (addonHint) {
+    const selectedAddons = ["graphical", "video"].filter((service) =>
+      companionServiceSelected(service)
+    );
+    if (selectedAddons.length === 0) {
+      addonHint.textContent =
+        "Tick Graphical Abstract and/or Video Production, then continue to your quote.";
+    } else {
+      const names = selectedAddons.map(companionServiceLabel);
+      addonHint.textContent = `Continue with ${names.join(" and ")}.`;
+    }
+  }
+}
+
+function setCompanionService(service, selected) {
+  if (!form || !["figures", "layout", "graphical", "video"].includes(service)) {
+    return;
+  }
+
+  if (companionServiceLocked(service)) {
+    const input = document.querySelector(
+      `.select-companion[data-companion-service="${service}"]`
+    );
+    if (input) input.checked = true;
+    showToast("Layout Editing is included free with Academic for MDPI journals.");
+    return;
+  }
+
+  if (service === "figures") {
+    figuresSelectiveOptIn = !!selected;
+    setServiceChecked("figures", !!selected);
+    if (!selected && form.figures) {
+      form.figures.value = "";
+      figuresCountUserEdited = false;
+    } else if (
+      selected &&
+      lastManuscriptDetection?.items > 0 &&
+      form.figures &&
+      !figuresCountUserEdited
+    ) {
+      form.figures.value = String(lastManuscriptDetection.items);
+    }
+  } else if (service === "layout") {
+    layoutSelectiveOptIn = !!selected;
+    setServiceChecked("layout", !!selected);
+  } else {
+    setServiceChecked(service, !!selected);
+  }
+
+  syncFormState();
+}
+
+function goToCompanionQuote() {
+  if (!form) return;
+
+  ["figures", "layout"].forEach((service) => {
+    const input = document.querySelector(
+      `.select-companion[data-companion-service="${service}"]`
+    );
+    if (!input) return;
+    if (companionServiceLocked(service)) {
+      setCompanionService(service, true);
+      return;
+    }
+    setCompanionService(service, input.checked);
+  });
+
+  syncFormState();
+  document.getElementById("quote")?.scrollIntoView({ behavior: "smooth" });
+
+  const selected = ["figures", "layout"].filter((service) =>
+    companionServiceSelected(service)
+  );
+  const hasLanguage = getSelectedServices().includes("language");
+
+  if (selected.length === 0 && !hasLanguage) {
+    showToast("Select Figure & Table Editing and/or Layout Editing, then get a quote.");
+    return;
+  }
+
+  if (selected.length === 0) {
+    showToast("Continue to your quote to configure your selected services.");
+    return;
+  }
+
+  const names = selected.map(companionServiceLabel);
+  showToast(
+    hasLanguage
+      ? `${names.join(" and ")} added. Continue configuring your quote.`
+      : `${names.join(" and ")} selected. Continue configuring your quote.`
+  );
+}
+
+function goToAdditionalQuote() {
+  if (!form) return;
+
+  ["graphical", "video"].forEach((service) => {
+    const input = document.querySelector(
+      `.select-companion[data-companion-service="${service}"]`
+    );
+    if (!input) return;
+    setCompanionService(service, input.checked);
+  });
+
+  syncFormState();
+  document.getElementById("quote")?.scrollIntoView({ behavior: "smooth" });
+
+  const selected = ["graphical", "video"].filter((service) =>
+    companionServiceSelected(service)
+  );
+
+  if (selected.length === 0) {
+    showToast("Select Graphical Abstract and/or Video Production, then get a quote.");
+    return;
+  }
+
+  const names = selected.map(companionServiceLabel);
+  showToast(`${names.join(" and ")} selected. Continue configuring your quote.`);
 }
 
 function updateWordsDescribedBy() {
@@ -2349,6 +2645,20 @@ if (form) {
       syncFormState();
       showToast(`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier selected.`);
     });
+  });
+
+  document.querySelectorAll(".select-companion").forEach((input) => {
+    input.addEventListener("change", () => {
+      setCompanionService(input.dataset.companionService, input.checked);
+    });
+  });
+
+  document.getElementById("companion-get-quote")?.addEventListener("click", () => {
+    goToCompanionQuote();
+  });
+
+  document.getElementById("addon-get-quote")?.addEventListener("click", () => {
+    goToAdditionalQuote();
   });
 
   form.addEventListener("input", (event) => {
