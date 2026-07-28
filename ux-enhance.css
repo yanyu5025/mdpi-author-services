@@ -88,12 +88,16 @@ html {
 }
 
 /* Header */
-.site-header {
+.site-chrome {
   transition: box-shadow 0.2s var(--ease-out), background 0.2s;
 }
 
-.site-header.is-scrolled {
+.site-chrome.is-scrolled {
   box-shadow: 0 8px 24px rgba(26, 31, 46, 0.06);
+}
+
+.site-header {
+  transition: background 0.2s;
 }
 
 .main-nav a {

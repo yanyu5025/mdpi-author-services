@@ -3315,22 +3315,62 @@ if (!document.getElementById("quote-form")) {
 }
 
 (function initUxChrome() {
+  const chrome = document.querySelector(".site-chrome");
   const header = document.querySelector(".site-header");
   const backToTop = document.getElementById("back-to-top");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const sectionNavLinks = Array.from(
+    document.querySelectorAll(".secondary-nav-link[data-nav-section]")
+  );
 
-  const scrollToTop = () => {
-    const topEl = document.getElementById("top");
+  const getChromeOffset = () => {
+    const el = chrome || header;
+    return (el?.getBoundingClientRect().height || 0) + 12;
+  };
+
+  const updateScrollPadding = () => {
+    document.documentElement.style.scrollPaddingTop = `${getChromeOffset()}px`;
+  };
+  updateScrollPadding();
+  window.addEventListener("resize", updateScrollPadding, { passive: true });
+
+  const easeInOutCubic = (t) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  const animateScrollTo = (destinationY, durationMs = 1100) => {
     if (reduceMotion) {
-      window.scrollTo(0, 0);
-      topEl?.focus?.({ preventScroll: true });
+      window.scrollTo(0, destinationY);
       return;
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const start = window.scrollY;
+    const distance = destinationY - start;
+    if (Math.abs(distance) < 1) return;
+    const startTime = performance.now();
+    const step = (now) => {
+      const progress = Math.min(1, (now - startTime) / durationMs);
+      window.scrollTo(0, start + distance * easeInOutCubic(progress));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    updateScrollPadding();
+    const top =
+      section.getBoundingClientRect().top + window.scrollY - getChromeOffset();
+    animateScrollTo(Math.max(0, top), 1100);
+    history.replaceState(null, "", `#${sectionId}`);
+  };
+
+  const scrollToTop = () => {
+    animateScrollTo(0, 900);
   };
 
   const onScroll = () => {
     const y = window.scrollY || document.documentElement.scrollTop;
+    chrome?.classList.toggle("is-scrolled", y > 8);
     header?.classList.toggle("is-scrolled", y > 8);
     if (backToTop) {
       const show = y > 480;
@@ -3355,29 +3395,127 @@ if (!document.getElementById("quote-form")) {
     });
   });
 
-  const sectionIds = ["services", "additional-services", "quote", "faqs"];
-  const navLinks = Array.from(document.querySelectorAll(".main-nav a[href^='#']"));
-  if (!navLinks.length) return;
+  sectionNavLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const sectionId = link.getAttribute("data-nav-section");
+      if (!sectionId || !document.getElementById(sectionId)) return;
+      event.preventDefault();
+      scrollToSection(sectionId);
+    });
+  });
 
-  const sections = sectionIds
-    .map((id) => document.getElementById(id))
-    .filter(Boolean);
+  // Highlight secondary-nav section links from viewport position.
+  if (sectionNavLinks.length && "IntersectionObserver" in window) {
+    const sections = sectionNavLinks
+      .map((link) => document.getElementById(link.getAttribute("data-nav-section")))
+      .filter(Boolean);
 
-  if (!sections.length || !("IntersectionObserver" in window)) return;
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const id = entry.target.id;
-        navLinks.forEach((link) => {
-          const href = link.getAttribute("href") || "";
-          link.classList.toggle("is-active", href === `#${id}`);
-        });
+    const setActiveSection = (id) => {
+      sectionNavLinks.forEach((link) => {
+        const match = link.getAttribute("data-nav-section") === id;
+        link.classList.toggle("is-active", match);
+        if (match) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
       });
-    },
-    { rootMargin: "-40% 0px -50% 0px", threshold: 0.01 }
-  );
+    };
 
-  sections.forEach((section) => observer.observe(section));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActiveSection(visible[0].target.id);
+      },
+      { rootMargin: "-35% 0px -45% 0px", threshold: [0.08, 0.2, 0.4] }
+    );
+    sections.forEach((section) => observer.observe(section));
+  }
+
+  // Language dropdown in secondary nav
+  const langMenuRoot = document.querySelector("[data-lang-menu]");
+  if (langMenuRoot) {
+    const trigger = langMenuRoot.querySelector("#secondary-lang-trigger");
+    const menu = langMenuRoot.querySelector("#secondary-lang-menu");
+    const options = Array.from(langMenuRoot.querySelectorAll("[data-lang]"));
+
+    const closeMenu = () => {
+      if (!trigger || !menu) return;
+      trigger.setAttribute("aria-expanded", "false");
+      menu.hidden = true;
+    };
+
+    const openMenu = () => {
+      if (!trigger || !menu) return;
+      trigger.setAttribute("aria-expanded", "true");
+      menu.hidden = false;
+      const selected =
+        options.find((opt) => opt.classList.contains("is-selected")) || options[0];
+      selected?.focus();
+    };
+
+    const toggleMenu = () => {
+      if (trigger?.getAttribute("aria-expanded") === "true") closeMenu();
+      else openMenu();
+    };
+
+    trigger?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleMenu();
+    });
+
+    options.forEach((option, index) => {
+      option.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const lang = option.getAttribute("data-lang");
+        window.MdpiI18n?.setLanguage?.(lang);
+        closeMenu();
+        trigger?.focus();
+      });
+
+      option.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          options[(index + 1) % options.length]?.focus();
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          options[(index - 1 + options.length) % options.length]?.focus();
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          options[0]?.focus();
+        } else if (event.key === "End") {
+          event.preventDefault();
+          options[options.length - 1]?.focus();
+        } else if (event.key === "Escape") {
+          event.preventDefault();
+          closeMenu();
+          trigger?.focus();
+        } else if (event.key === "Tab") {
+          closeMenu();
+        }
+      });
+    });
+
+    trigger?.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openMenu();
+      } else if (event.key === "Escape") {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!langMenuRoot.contains(event.target)) closeMenu();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu();
+    });
+  }
+
+  // Honor deep links like #services after load, with chrome offset.
+  const hashId = (location.hash || "").replace(/^#/, "");
+  if (hashId && document.getElementById(hashId) && sectionNavLinks.some((l) => l.getAttribute("data-nav-section") === hashId)) {
+    requestAnimationFrame(() => scrollToSection(hashId));
+  }
 })();

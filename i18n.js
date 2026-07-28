@@ -5,6 +5,8 @@ const MDPI_I18N = {
   en: {
     skipToContent: "Skip to content",
     navLanguage: "Language Editing",
+    navEnglishEditing: "English Language Editing",
+    navAdditionalServices: "Additional Services",
     navMore: "More Services",
     navQuote: "Get a Quote",
     navFaqs: "FAQs",
@@ -12,6 +14,8 @@ const MDPI_I18N = {
     headerMdpi: "MDPI",
     headerMdpiHint: "(opens in new tab)",
     langLabel: "Language",
+    langEnglish: "English",
+    langChinese: "Chinese",
     heroEyebrow: "Professional editorial support for researchers",
     heroTitle: "English Language Editing for Researchers",
     heroLead:
@@ -129,6 +133,8 @@ const MDPI_I18N = {
   zh: {
     skipToContent: "跳至主要内容",
     navLanguage: "语言润色",
+    navEnglishEditing: "英语语言润色",
+    navAdditionalServices: "附加服务",
     navMore: "更多服务",
     navQuote: "获取报价",
     navFaqs: "常见问题",
@@ -136,6 +142,8 @@ const MDPI_I18N = {
     headerMdpi: "MDPI",
     headerMdpiHint: "（在新标签页中打开）",
     langLabel: "语言",
+    langEnglish: "English",
+    langChinese: "中文",
     heroEyebrow: "为研究人员提供专业编辑支持",
     heroTitle: "面向研究人员的英语语言润色",
     heroLead:
@@ -252,7 +260,12 @@ const MDPI_I18N = {
 const LANG_STORAGE_KEY = "mdpi-as-lang";
 
 function getLanguage() {
-  // Header language switcher removed — UI stays in English.
+  try {
+    const stored = localStorage.getItem(LANG_STORAGE_KEY);
+    if (stored === "zh" || stored === "en") return stored;
+  } catch {
+    /* ignore */
+  }
   return "en";
 }
 
@@ -273,6 +286,7 @@ function t(key) {
 }
 
 function applyTranslations(root = document) {
+  const lang = getLanguage();
   root.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     if (key) el.textContent = t(key);
@@ -289,20 +303,34 @@ function applyTranslations(root = document) {
     const key = el.getAttribute("data-i18n-aria");
     if (key) el.setAttribute("aria-label", t(key));
   });
-  document.documentElement.lang = "en";
+
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+
+  root.querySelectorAll("[data-lang]").forEach((el) => {
+    const optionLang = el.getAttribute("data-lang");
+    const selected = optionLang === lang;
+    el.classList.toggle("is-selected", selected);
+    el.setAttribute("aria-selected", selected ? "true" : "false");
+  });
+
+  const enOption = root.querySelector('[data-lang="en"]');
+  const zhOption = root.querySelector('[data-lang="zh"]');
+  if (enOption) enOption.textContent = t("langEnglish");
+  if (zhOption) zhOption.textContent = t("langChinese");
 }
 
-function setLanguage() {
-  // Language switching is disabled (header selector removed).
-  applyTranslations();
-}
-
-function initLanguageSelector() {
+function setLanguage(lang) {
+  if (lang !== "en" && lang !== "zh") return;
   try {
-    localStorage.removeItem(LANG_STORAGE_KEY);
+    localStorage.setItem(LANG_STORAGE_KEY, lang);
   } catch {
     /* ignore */
   }
+  applyTranslations();
+  window.dispatchEvent(new CustomEvent("mdpi-language-change", { detail: { lang } }));
+}
+
+function initLanguageSelector() {
   applyTranslations();
 }
 
