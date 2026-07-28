@@ -264,7 +264,7 @@
       academic: "Free",
     },
     {
-      label: "2 PhD specialist review & report",
+      label: "2 PhD specialist editors",
       standard: false,
       rapid: false,
       academic: true,
@@ -288,7 +288,7 @@
     ],
     academic: [
       "Everything in Rapid",
-      "2 PhD specialist review & report",
+      "2 PhD specialist editors",
       "50% off Figure & Table Editing",
       "Free Layout Editing for MDPI journals",
       "5-day turnaround",
