@@ -477,7 +477,7 @@ function renderLineItems() {
       note: pricing.figuresIncluded
         ? "Included (Academic)"
         : pricing.figuresDiscountRate > 0
-          ? `${Math.round(pricing.figuresDiscountRate * 100)}% off (${tier === "rapid" ? "Rapid" : "Standard"})`
+          ? `${Math.round(pricing.figuresDiscountRate * 100)}% off (${TIER_LABELS[tier] || tier})`
           : null,
     });
   }
@@ -485,7 +485,11 @@ function renderLineItems() {
     rows.push({
       label: SERVICE_TITLES.layout,
       amount: pricing.layoutIncluded ? 0 : pricing.layout,
-      note: pricing.layoutIncluded ? "Included (Academic)" : null,
+      note: pricing.layoutIncluded
+        ? "Free for MDPI journals"
+        : pricing.layoutDiscountRate > 0
+          ? `${Math.round(pricing.layoutDiscountRate * 100)}% off (${TIER_LABELS[tier] || tier})`
+          : null,
     });
   }
   if (services.includes("graphical") && pricing.graphical > 0) {
@@ -517,8 +521,10 @@ function renderLineItems() {
         }
       } else if (row.isDiscount) {
         value = `−${formatMoney(Math.abs(row.amount), currency)}`;
-      } else if (row.note) {
+      } else if (row.note && row.amount === 0) {
         value = row.note;
+      } else if (row.note) {
+        value = `${formatMoney(row.amount, currency)} <span class="checkout-line-note">${escapeHtml(row.note)}</span>`;
       } else {
         value = formatMoney(row.amount, currency);
       }

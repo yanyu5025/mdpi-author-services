@@ -2004,6 +2004,15 @@ a:hover {
   text-decoration: line-through;
 }
 
+.price-lines > dd.price-line .price-line-note {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--mdpi-green);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: normal;
+}
+
 .price-lines > dt.price-discount,
 .price-lines > dd.price-discount {
   color: var(--mdpi-green);

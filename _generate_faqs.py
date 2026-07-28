@@ -26,11 +26,11 @@ TOPICS = [
             ),
             (
                 "What is included in the Rapid service?",
-                "The same high-quality editing as Standard, completed within 1 day of payment. Includes free re-editing for up to 1 year, one-time complimentary editing of a cover letter and reviewer response letter, and a 10% discount on Figure and Table Editing.",
+                "The same high-quality editing as Standard, completed within 1 day of payment. Includes free re-editing for up to 1 year, one-time complimentary editing of a cover letter and reviewer response letter, and a 10% discount on Figure and Table Editing and Layout Editing for MDPI journals.",
             ),
             (
                 "What is included in the Academic service?",
-                "All Rapid features, plus subject-specific editing and a Technical Review Report from a PhD-qualified editor. Includes Figure and Table Editing, and Layout Editing for MDPI journals. Completed in 5 days.",
+                "All Rapid features, plus subject-specific editing and a Technical Review Report from a PhD-qualified editor. Includes 50% off Figure and Table Editing, and Free Layout Editing for MDPI journals. Completed in 5 days.",
             ),
             (
                 "What is included in free re-editing?",
@@ -64,7 +64,7 @@ TOPICS = [
         "items": [
             (
                 "What is included in the Figure and Table Editing service?",
-                "We enhance your charts, graphs, and illustrations by revising colors, size, resolution, borders, fonts, and file type so your research is clearly communicated. Completed in 1 business day from payment. Choose Rapid for 10% off, or Academic to have Figure and Table Editing included.",
+                "We enhance your charts, graphs, and illustrations by revising colors, size, resolution, borders, fonts, and file type so your research is clearly communicated. Completed in 1 business day from payment. Choose Rapid for 10% off, or Academic for 50% off Figure and Table Editing.",
             ),
             (
                 "Is free re-editing available for figures?",
@@ -112,7 +112,7 @@ TOPICS = [
             ),
             (
                 "Is Layout Editing included with Academic?",
-                "Yes. Layout Editing for MDPI journal submissions is included with the Academic language editing service.",
+                "Yes. Free Layout Editing for MDPI journal submissions is included with the Academic language editing service.",
             ),
             (
                 "Is free re-editing available for layout?",

@@ -103,11 +103,12 @@ const FX = window.MdpiMoney?.FX ?? {
 const FIGURE_DISCOUNT = {
   standard: 0,
   rapid: 0.1,
-  academic: 1, // Included with Academic
+  academic: 0.5, // 50% off with Academic
 };
 
 const LAYOUT_DISCOUNT = {
-  academic: 1, // Included with Academic for MDPI journals
+  rapid: 0.1, // 10% off Layout Editing for MDPI journals with Rapid
+  academic: 1, // Free Layout Editing for MDPI journals with Academic
 };
 
 const SERVICE_TURNAROUND = {
@@ -637,25 +638,16 @@ function figureEditingEstimate(items, tier = currentEditingTier()) {
     Array.from(form.querySelectorAll('input[name="service"]:checked')).some(
       (input) => input.value === "language"
     );
-  const included = hasLanguage && isAcademicTier(tier);
   const discount = hasLanguage ? FIGURE_DISCOUNT[tier] ?? 0 : 0;
   const base = count * RATES.figures.perUnit;
-  const total = included ? 0 : base * (1 - discount);
-  return { count, base, total, discount, tier, included };
+  const total = base * (1 - discount);
+  return { count, base, total, discount, tier, included: false };
 }
 
 function syncFiguresForTierAndDetection() {
   if (!lastManuscriptDetection || !form) return;
 
   const items = lastManuscriptDetection.items;
-  const tier = currentEditingTier();
-
-  if (isAcademicTier(tier) && items > 0) {
-    setServiceChecked("figures", true);
-    form.figures.value = String(items);
-    return;
-  }
-
   const includeEl = document.getElementById("include-detected-figures");
   if (includeEl?.checked && items > 0 && figuresSelectiveOptIn) {
     setServiceChecked("figures", true);
@@ -693,8 +685,6 @@ function renderManuscriptDetection(detection) {
   if (priceEl) {
     if (estimate.count < 1) {
       priceEl.innerHTML = "No figures or tables detected in the manuscript body.";
-    } else if (estimate.included) {
-      priceEl.innerHTML = `${estimate.count} item${estimate.count === 1 ? "" : "s"} · <strong>Included with ${tierLabel}</strong>`;
     } else if (estimate.discount > 0) {
       priceEl.innerHTML = `${estimate.count} item${estimate.count === 1 ? "" : "s"} · <strong>${formatMoney(
         estimate.total,
@@ -710,8 +700,8 @@ function renderManuscriptDetection(detection) {
 
   if (badgeEl) {
     if (academic) {
-      badgeEl.textContent = "Included with Academic";
-      badgeEl.classList.toggle("is-included", estimate.count > 0);
+      badgeEl.textContent = "Optional · 50% off with Academic";
+      badgeEl.classList.remove("is-included");
     } else if (isStandardTier(tier)) {
       badgeEl.textContent = "Optional with Standard";
       badgeEl.classList.remove("is-included");
@@ -721,28 +711,30 @@ function renderManuscriptDetection(detection) {
     }
   }
 
-  const showOptionalToggle = !academic && estimate.count > 0;
+  const showOptionalToggle = estimate.count > 0;
   includeLabel?.classList.toggle("hidden", !showOptionalToggle);
-  includedNote?.classList.toggle("hidden", !(academic && estimate.count > 0));
+  includedNote?.classList.toggle("hidden", true);
 
   if (includeEl) {
-    includeEl.disabled = estimate.count < 1 || academic;
-    if (academic && estimate.count > 0) {
-      includeEl.checked = true;
-    } else if (estimate.count < 1) {
+    includeEl.disabled = estimate.count < 1;
+    if (estimate.count < 1) {
       includeEl.checked = false;
     } else {
       includeEl.checked = figuresSelectiveOptIn;
     }
   }
   if (includeText) {
-    includeText.textContent = isStandardTier(tier)
-      ? "Add with Standard"
-      : "Add with Rapid (10% off)";
+    if (academic) {
+      includeText.textContent = "Add with Academic (50% off)";
+    } else if (isStandardTier(tier)) {
+      includeText.textContent = "Add with Standard";
+    } else {
+      includeText.textContent = "Add with Rapid (10% off)";
+    }
   }
 
   offerEl?.classList.toggle("is-disabled", estimate.count < 1);
-  offerEl?.classList.toggle("is-included", academic && estimate.count > 0);
+  offerEl?.classList.remove("is-included");
 }
 
 function applyManuscriptDetection(detection) {
@@ -787,13 +779,9 @@ function applyManuscriptDetection(detection) {
 
   setServiceChecked("language", true);
 
-  if (isAcademicTier() && detection.items > 0) {
-    figuresSelectiveOptIn = true;
-  } else {
-    figuresSelectiveOptIn = false;
-    setServiceChecked("figures", false);
-    if (form?.figures) form.figures.value = "";
-  }
+  figuresSelectiveOptIn = false;
+  setServiceChecked("figures", false);
+  if (form?.figures) form.figures.value = "";
 
   syncFiguresForTierAndDetection();
   renderManuscriptDetection(detection);
@@ -806,61 +794,56 @@ function applyManuscriptDetection(detection) {
 }
 
 function applyDetectedFiguresToQuote(include, { silent = false } = {}) {
-  if (isAcademicTier()) {
-    figuresSelectiveOptIn = true;
-    syncFiguresForTierAndDetection();
-    if (typeof syncFormState === "function" && form) syncFormState();
-    return;
-  }
-
   const items = lastManuscriptDetection?.items || 0;
-  if (include && items < 1 && !lastManuscriptDetection) {
-    // Allow manual selective add later only when detection exists.
-    figuresSelectiveOptIn = false;
-  }
+  const manualCount = Math.max(0, Number(form?.figures?.value) || 0);
 
-  figuresSelectiveOptIn = !!include && items > 0;
-
-  if (include && items < 1) {
+  if (!include) {
     figuresSelectiveOptIn = false;
-    const includeEl = document.getElementById("include-detected-figures");
-    if (includeEl) includeEl.checked = false;
+    setServiceChecked("figures", false);
+    if (form?.figures) form.figures.value = "";
+    figuresCountUserEdited = false;
+    const uploadInclude = document.getElementById("include-detected-figures");
+    if (uploadInclude) uploadInclude.checked = false;
     const quoteInclude = document.getElementById("quote-include-figures");
     if (quoteInclude) quoteInclude.checked = false;
-    if (!silent) showToast("No figures or tables were detected to add.");
     if (typeof syncFormState === "function" && form) syncFormState();
+    if (lastManuscriptDetection) renderManuscriptDetection(lastManuscriptDetection);
     return;
   }
 
-  setServiceChecked("figures", figuresSelectiveOptIn);
-  if (figuresSelectiveOptIn) {
-    if (form?.figures) form.figures.value = String(items);
-    if (!silent) {
-      const tier = currentEditingTier();
-      const discountPct = Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100);
-      const discountMsg =
-        discountPct > 0
-          ? ` (${discountPct}% off with ${TIER_LABELS[tier]} language editing)`
-          : "";
-      showToast(
-        `Figure & Table Editing added for ${items} item${items === 1 ? "" : "s"}${discountMsg}.`
-      );
-    }
-  } else {
-    if (form?.figures) form.figures.value = "";
+  figuresSelectiveOptIn = true;
+  setServiceChecked("figures", true);
+
+  if (items > 0 && form?.figures && !figuresCountUserEdited) {
+    form.figures.value = String(items);
   }
 
   const uploadInclude = document.getElementById("include-detected-figures");
-  if (uploadInclude) uploadInclude.checked = figuresSelectiveOptIn;
+  if (uploadInclude) uploadInclude.checked = items > 0;
   const quoteInclude = document.getElementById("quote-include-figures");
-  if (quoteInclude) quoteInclude.checked = figuresSelectiveOptIn;
+  if (quoteInclude) quoteInclude.checked = true;
 
-  if (typeof syncFormState === "function" && form) {
-    syncFormState();
+  if (!silent) {
+    const tier = currentEditingTier();
+    const discountPct = Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100);
+    const discountMsg =
+      discountPct > 0
+        ? ` (${discountPct}% off with ${TIER_LABELS[tier]} language editing)`
+        : "";
+    const count = items > 0 ? items : manualCount;
+    if (count > 0) {
+      showToast(
+        `Figure & Table Editing added for ${count} item${count === 1 ? "" : "s"}${discountMsg}.`
+      );
+    } else {
+      showToast(
+        `Figure & Table Editing added${discountMsg}. Enter your figure/table count.`
+      );
+    }
   }
-  if (lastManuscriptDetection) {
-    renderManuscriptDetection(lastManuscriptDetection);
-  }
+
+  if (typeof syncFormState === "function" && form) syncFormState();
+  if (lastManuscriptDetection) renderManuscriptDetection(lastManuscriptDetection);
 }
 
 function applyLayoutToQuote(include) {
@@ -920,14 +903,11 @@ async function handleManuscriptFile(file, statusEl) {
     const tier = currentEditingTier();
     let figureMsg = "";
     if (detection.items > 0) {
-      if (isAcademicTier(tier)) {
-        figureMsg = ` Figure & Table Editing included with Academic for ${detection.items} item${detection.items === 1 ? "" : "s"}.`;
-      } else {
-        const tierLabel = tier === "standard" ? "Standard" : "Rapid";
-        const discountNote =
-          tier === "rapid" ? " (10% off)" : " (full price)";
-        figureMsg = ` ${detection.items} figure/table item${detection.items === 1 ? "" : "s"} detected — optionally add Figure & Table Editing with ${tierLabel}${discountNote}.`;
-      }
+      const tierLabel = TIER_LABELS[tier] || tier;
+      const discountPct = Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100);
+      const discountNote =
+        discountPct > 0 ? ` (${discountPct}% off)` : " (full price)";
+      figureMsg = ` ${detection.items} figure/table item${detection.items === 1 ? "" : "s"} detected — optionally add Figure & Table Editing with ${tierLabel}${discountNote}.`;
     }
     showToast(
       `Detected ${detection.words.toLocaleString("en-US")} words.${figureMsg || " Language editing prices updated."}`
@@ -966,11 +946,6 @@ function initManuscriptUpload() {
   });
   quoteIncludeFigures?.addEventListener("change", (event) => {
     event.stopPropagation();
-    if (isAcademicTier()) {
-      quoteIncludeFigures.checked = true;
-      applyDetectedFiguresToQuote(true);
-      return;
-    }
     applyDetectedFiguresToQuote(quoteIncludeFigures.checked);
   });
 
@@ -980,7 +955,6 @@ function initManuscriptUpload() {
     if (quoteIncludeFigures?.disabled) return;
     event.preventDefault();
     event.stopPropagation();
-    if (isAcademicTier()) return;
     quoteIncludeFigures.checked = !quoteIncludeFigures.checked;
     applyDetectedFiguresToQuote(quoteIncludeFigures.checked);
   });
@@ -1491,7 +1465,7 @@ function formatMoney(amount, currency) {
   return `${currency} ${converted.toFixed(2)}`;
 }
 
-function setLine(id, value, currency, active, freeLabel) {
+function setLine(id, value, currency, active, noteLabel) {
   const dd = document.getElementById(id);
   if (!dd) return;
   const dt = document.getElementById(`${id}-label`);
@@ -1501,8 +1475,12 @@ function setLine(id, value, currency, active, freeLabel) {
     dd.textContent = "—";
     return;
   }
-  if (freeLabel) {
-    dd.textContent = freeLabel;
+  if (noteLabel && !(value > 0)) {
+    dd.textContent = noteLabel;
+    return;
+  }
+  if (noteLabel && value > 0) {
+    dd.innerHTML = `${formatMoney(value, currency)} <span class="price-line-note">${noteLabel}</span>`;
     return;
   }
   dd.textContent = formatMoney(value, currency);
@@ -1609,23 +1587,18 @@ function calculateQuote() {
 
   const editingCampaignActive = editingCampaignDiscount > 0;
 
-  const figuresIncluded =
-    services.includes("figures") &&
-    services.includes("language") &&
-    isAcademicTier(tier) &&
-    figures > 0;
+  const figuresIncluded = false;
 
   if (services.includes("figures") && figures > 0) {
     const base = figures * RATES.figures.perUnit;
     const discount =
-      services.includes("language") && figuresBundlingAvailable(tier) && !figuresIncluded
+      services.includes("language") && figuresBundlingAvailable(tier)
         ? FIGURE_DISCOUNT[tier] ?? 0
         : 0;
-    figureCost = figuresIncluded ? 0 : base * (1 - discount);
+    figureCost = base * (1 - discount);
   }
 
   const figureDiscountRate =
-    !figuresIncluded &&
     services.includes("figures") &&
     services.includes("language") &&
     figures > 0 &&
@@ -1638,13 +1611,17 @@ function calculateQuote() {
     services.includes("language") &&
     tier === "academic";
 
-  if (services.includes("layout")) {
-    const layoutDiscount = services.includes("language")
+  const layoutDiscountRate =
+    !layoutFree &&
+    services.includes("layout") &&
+    services.includes("language")
       ? LAYOUT_DISCOUNT[tier] ?? 0
       : 0;
+
+  if (services.includes("layout")) {
     layout = layoutFree
       ? 0
-      : RATES.layout.flat * (1 - layoutDiscount);
+      : RATES.layout.flat * (1 - layoutDiscountRate);
   }
 
   if (services.includes("graphical")) {
@@ -1680,18 +1657,20 @@ function calculateQuote() {
     figureCost,
     currency,
     services.includes("figures") && figures > 0,
-    figuresIncluded
-      ? "Included (Academic)"
-      : figureDiscountRate > 0
-        ? figureDiscountLabel(tier, figureDiscountRate)
-        : null
+    figureDiscountRate > 0
+      ? `${Math.round(figureDiscountRate * 100)}% off (${TIER_LABELS[tier] || tier})`
+      : null
   );
   setLine(
     "line-layout",
     layout,
     currency,
     services.includes("layout"),
-    layoutFree ? "Included (Academic)" : null
+    layoutFree
+      ? "Free for MDPI journals"
+      : layoutDiscountRate > 0
+        ? `${Math.round(layoutDiscountRate * 100)}% off (${TIER_LABELS[tier] || tier})`
+        : null
   );
   setLine("line-graphical", graphical, currency, services.includes("graphical"));
   const videoActive = services.includes("video") && video > 0;
@@ -1749,6 +1728,7 @@ function calculateQuote() {
       figuresDiscountRate: figureDiscountRate,
       layout,
       layoutIncluded: layoutFree,
+      layoutDiscountRate,
       graphical,
       video,
       videoCampaign: videoActive && isVideoCampaignActive(),
@@ -1817,13 +1797,12 @@ function syncFormState() {
     figuresServiceInput
       .closest(".checkbox-card")
       ?.classList.remove("is-disabled");
-    figuresServiceInput.dataset.lockedByAcademic =
-      hasLanguage && isAcademic ? "1" : "";
+    figuresServiceInput.dataset.lockedByAcademic = "";
   }
 
   noServiceHint.classList.toggle("hidden", services.length > 0);
 
-  // Academic includes Layout Editing for MDPI journals.
+  // Academic includes free Layout Editing for MDPI journals.
   const leavingAcademic =
     previousEditingTier === "academic" && !isAcademic;
   const layoutIncludedByE3 = !!(hasLanguage && isAcademic);
@@ -1853,8 +1832,7 @@ function syncFormState() {
     if (service === "figures") {
       const showFiguresPanel =
         hasFigures ||
-        (isAcademic && hasLanguage) ||
-        (hasLanguage && !isAcademic && (hasDetectedFigures || figuresSelectiveOptIn));
+        (hasLanguage && (isAcademic || hasDetectedFigures || figuresSelectiveOptIn));
       togglePanel(service, showFiguresPanel);
       return;
     }
@@ -1899,8 +1877,12 @@ function syncFormState() {
       : layoutSelectiveOptIn;
   }
   if (layoutOptInText && !isAcademic) {
-    layoutOptInText.innerHTML =
-      `Add Layout Editing<small>Optional with ${tier === "standard" ? "Standard" : "Rapid"} · CHF ${RATES.layout.flat.toFixed(2)} per submission</small>`;
+    const layoutDiscountPct = Math.round((LAYOUT_DISCOUNT[tier] ?? 0) * 100);
+    const layoutPriceNote =
+      layoutDiscountPct > 0
+        ? `${layoutDiscountPct}% off with ${TIER_LABELS[tier]} · was CHF ${RATES.layout.flat.toFixed(2)}`
+        : `Optional with ${tier === "standard" ? "Standard" : "Rapid"} · CHF ${RATES.layout.flat.toFixed(2)} per submission`;
+    layoutOptInText.innerHTML = `Add Layout Editing<small>${layoutPriceNote}</small>`;
   }
   layoutOptFields?.classList.toggle(
     "hidden",
@@ -1919,10 +1901,7 @@ function syncFormState() {
   const figuresCheckboxCard = document
     .querySelector('input[name="service"][value="figures"]')
     ?.closest(".checkbox-card");
-  figuresCheckboxCard?.classList.toggle(
-    "is-included-selected",
-    !!(hasLanguage && isAcademic)
-  );
+  figuresCheckboxCard?.classList.remove("is-included-selected");
 
   const figureOptInRow = document.getElementById("figure-opt-in-row");
   const figureOptFields = document.getElementById("figure-opt-fields");
@@ -1930,24 +1909,11 @@ function syncFormState() {
   const figureOptInText = document.getElementById("figure-opt-in-text");
   const figuresDetectionHint = document.getElementById("figures-detection-hint");
 
-  // Academic includes detected figures/tables; Standard/Rapid remain selective.
+  // All tiers use selective Figure & Table Editing; Academic gets 50% off when bundled.
   if (lastManuscriptDetection) {
     const items = lastManuscriptDetection.items;
 
-    if (isAcademic && hasLanguage && items > 0) {
-      setServiceChecked("figures", true);
-      if (form.figures && !figuresCountUserEdited) {
-        form.figures.value = String(items);
-      }
-    } else if (leavingAcademic) {
-      figuresSelectiveOptIn = false;
-      setServiceChecked("figures", false);
-      if (form.figures) form.figures.value = "";
-      figuresCountUserEdited = false;
-      const includeDetected = document.getElementById("include-detected-figures");
-      if (includeDetected) includeDetected.checked = false;
-      if (quoteIncludeFigures) quoteIncludeFigures.checked = false;
-    } else if (!isAcademic && hasLanguage && hasDetectedFigures) {
+    if (hasLanguage && hasDetectedFigures) {
       setServiceChecked("figures", figuresSelectiveOptIn);
       if (figuresSelectiveOptIn && form.figures && !figuresCountUserEdited) {
         form.figures.value = String(items);
@@ -1961,16 +1927,9 @@ function syncFormState() {
 
   previousEditingTier = tier;
 
-  if (isAcademic && hasLanguage) {
-    setServiceChecked("figures", true);
-    figuresSelectiveOptIn = true;
-  }
+  const figuresNowSelected = getSelectedServices().includes("figures");
 
-  const figuresNowSelected =
-    getSelectedServices().includes("figures") ||
-    (isAcademic && hasLanguage);
-
-  if (!isAcademic && hasDetectedFigures) {
+  if (hasDetectedFigures) {
     setServiceChecked("figures", figuresSelectiveOptIn);
   }
 
@@ -1980,47 +1939,31 @@ function syncFormState() {
       (isAcademic || hasFigureItems || figuresNowSelected || hasDetectedFigures);
     figureOptInRow.classList.toggle("hidden", !showFigurePanel);
 
-    if (isAcademic) {
-      figureOptInRow.classList.toggle("is-locked", true);
-      figureOptInRow.classList.toggle("is-selective", false);
-      quoteIncludeFigures.disabled = true;
-      quoteIncludeFigures.checked = true;
+    figureOptInRow.classList.toggle("is-locked", false);
+    figureOptInRow.classList.toggle("is-selective", true);
+    quoteIncludeFigures.disabled = false;
+    quoteIncludeFigures.checked = figuresSelectiveOptIn || hasFigures;
 
-      if (figureOptInText) {
-        if (hasFigureItems) {
-          const includedSummary = hasDetectedFigures
-            ? `Detected ${lastManuscriptDetection.figures} figure${lastManuscriptDetection.figures === 1 ? "" : "s"} and ${lastManuscriptDetection.tables} table${lastManuscriptDetection.tables === 1 ? "" : "s"} from your manuscript`
-            : `${figureItemCount} figure/table item${figureItemCount === 1 ? "" : "s"} included`;
-          figureOptInText.innerHTML =
-            `Figure &amp; Table Editing included with Academic<small>${includedSummary}</small>`;
-        } else {
-          figureOptInText.innerHTML =
-            "Figure &amp; Table Editing included with Academic<small>Enter your figure/table count below when ready</small>";
-        }
-      }
+    const tierShort = TIER_LABELS[tier] || tier;
+    const discountPct = Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100);
+    let detectedSummary;
+    if (hasDetectedFigures) {
+      detectedSummary = `Detected ${lastManuscriptDetection.figures} figure${lastManuscriptDetection.figures === 1 ? "" : "s"} and ${lastManuscriptDetection.tables} table${lastManuscriptDetection.tables === 1 ? "" : "s"} · optional${discountPct > 0 ? ` · ${discountPct}% off with ${tierShort}` : ` · full price with ${tierShort}`}`;
+    } else if (isAcademic) {
+      detectedSummary = "Optional with Academic · 50% off with language editing";
+    } else if (discountPct > 0) {
+      detectedSummary = `Optional with ${tierShort} · ${discountPct}% off with language editing`;
     } else {
-      figureOptInRow.classList.toggle("is-locked", false);
-      figureOptInRow.classList.toggle("is-selective", true);
-      quoteIncludeFigures.disabled = false;
-      quoteIncludeFigures.checked = figuresSelectiveOptIn || hasFigures;
+      detectedSummary = `Optional with ${tierShort} · CHF ${RATES.figures.perUnit.toFixed(0)} per item`;
+    }
 
-      const tierShort = TIER_LABELS[tier] || tier;
-      const discountPct = Math.round((FIGURE_DISCOUNT[tier] ?? 0) * 100);
-      const detectedSummary = hasDetectedFigures
-        ? `Detected ${lastManuscriptDetection.figures} figure${lastManuscriptDetection.figures === 1 ? "" : "s"} and ${lastManuscriptDetection.tables} table${lastManuscriptDetection.tables === 1 ? "" : "s"} · optional${discountPct > 0 ? ` · ${discountPct}% off with ${tierShort}` : ` · full price with ${tierShort}`}`
-        : discountPct > 0
-          ? `Optional with ${tierShort} · ${discountPct}% off with language editing`
-          : `Optional with ${tierShort} · CHF ${RATES.figures.perUnit.toFixed(0)} per item`;
-
-      if (figureOptInText) {
-        figureOptInText.innerHTML =
-          `Add Figure &amp; Table Editing<small id="figure-opt-summary">${detectedSummary}</small>`;
-      }
+    if (figureOptInText) {
+      figureOptInText.innerHTML =
+        `Add Figure &amp; Table Editing<small id="figure-opt-summary">${detectedSummary}</small>`;
     }
   }
 
-  const showFigureFields =
-    figuresNowSelected || (isAcademic && hasLanguage);
+  const showFigureFields = figuresNowSelected;
   figureOptFields?.classList.toggle("hidden", !showFigureFields);
 
   if (showFigureFields && hasDetectedFigures && form.figures && !figuresCountUserEdited) {
@@ -2039,22 +1982,17 @@ function syncFormState() {
   }
 
   const figureDiscount =
-    hasLanguage && figuresNowSelected && !isAcademic
+    hasLanguage && figuresNowSelected
       ? FIGURE_DISCOUNT[tier] ?? 0
       : 0;
   figuresDiscountHint.classList.toggle(
     "hidden",
-    !(figuresNowSelected && (figureDiscount > 0 || (isAcademic && hasLanguage)))
+    !(figuresNowSelected && figureDiscount > 0)
   );
-  if (figuresDiscountHint && figuresNowSelected) {
-    if (isAcademic && hasLanguage) {
-      figuresDiscountHint.textContent =
-        "Included with your Academic Language Editing service.";
-    } else if (figureDiscount > 0) {
-      figuresDiscountHint.textContent = `${Math.round(
-        figureDiscount * 100
-      )}% discount applied from your ${TIER_LABELS[tier]} Language Editing service.`;
-    }
+  if (figuresDiscountHint && figuresNowSelected && figureDiscount > 0) {
+    figuresDiscountHint.textContent = `${Math.round(
+      figureDiscount * 100
+    )}% off Figure & Table Editing with your ${TIER_LABELS[tier]} Language Editing service.`;
   }
 
   layoutFreeHint?.classList.toggle(
@@ -2063,7 +2001,7 @@ function syncFormState() {
   );
   if (layoutFreeHint && layoutNowSelected && hasLanguage && isAcademic) {
     layoutFreeHint.textContent =
-      "Included with your Academic Language Editing service for MDPI journals.";
+      "Free Layout Editing for MDPI journals with your Academic Language Editing service.";
   }
 
   // Prevent unchecking Layout while Academic includes it (without disabling the input).
@@ -2100,13 +2038,13 @@ function updateLanguagePerkMessage(hasLanguage, tier, isAcademic) {
 
   if (isAcademic) {
     languagePerk.innerHTML =
-      "Academic: <strong>Figure &amp; Table Editing</strong> included when detected, plus <strong>MDPI Layout Editing</strong>.";
+      "Academic: <strong>50% off Figure &amp; Table Editing</strong> when bundled, plus <strong>Free Layout Editing for MDPI journals</strong>.";
   } else if (tier === "standard") {
     languagePerk.innerHTML =
       "Standard: Figure &amp; Table Editing available as an optional add-on at full price.";
   } else {
     languagePerk.innerHTML =
-      "Rapid: <strong>10% off</strong> Figure &amp; Table Editing when bundled with language editing.";
+      "Rapid: <strong>10% off</strong> Figure &amp; Table Editing and Layout Editing when bundled with language editing.";
   }
   updateWordsDescribedBy();
 }
@@ -2142,9 +2080,15 @@ function updateAcademicRecommendation(hasLanguage, tier) {
       (1 -
         (figuresBundlingAvailable(tier) ? FIGURE_DISCOUNT[tier] ?? 0 : 0))
     : 0;
-  const layoutPrice = hasSelectedLayout ? RATES.layout.flat : 0;
+  const layoutPrice = hasSelectedLayout
+    ? RATES.layout.flat * (1 - (LAYOUT_DISCOUNT[tier] ?? 0))
+    : 0;
   const currentBundlePrice = languagePrice + figurePrice + layoutPrice;
-  const academicPrice = getLanguagePrice(words, "academic");
+  const academicFigurePrice = hasSelectedFigures
+    ? figureCount * RATES.figures.perUnit * (1 - (FIGURE_DISCOUNT.academic ?? 0))
+    : 0;
+  const academicPrice =
+    getLanguagePrice(words, "academic") + academicFigurePrice;
   const savings = currentBundlePrice - academicPrice;
 
   if (savings <= 0) {
@@ -2167,15 +2111,17 @@ function updateAcademicRecommendation(hasLanguage, tier) {
     );
   }
   if (hasSelectedLayout) {
-    bundleParts.push("Layout Editing (full price)");
+    const layoutLabel =
+      tier === "rapid" ? "10% off" : "full price";
+    bundleParts.push(`Layout Editing (${layoutLabel})`);
   }
 
   const academicIncludes = [];
   if (hasSelectedFigures) {
-    academicIncludes.push("Figure &amp; Table Editing");
+    academicIncludes.push("50% off Figure &amp; Table Editing");
   }
   if (hasSelectedLayout) {
-    academicIncludes.push("Layout Editing for MDPI journals");
+    academicIncludes.push("Free Layout Editing for MDPI journals");
   }
   const academicIncludeLabel =
     academicIncludes.length > 0
@@ -2186,7 +2132,7 @@ function updateAcademicRecommendation(hasLanguage, tier) {
     `Your bundle (${bundleParts.join(" + ")}) is estimated at ` +
     `<strong>${formatMoney(currentBundlePrice, currency)}</strong>. ` +
     `<strong>Academic</strong> is <strong>${formatMoney(academicPrice, currency)}</strong> ` +
-    `and includes ${academicIncludeLabel}. ` +
+    `with ${academicIncludeLabel}. ` +
     `Estimated saving: <strong>${formatMoney(savings, currency)}</strong>.`;
   recommendation.classList.remove("hidden");
 }

@@ -99,6 +99,11 @@ const MDPI_I18N = {
     videoCardDesc:
       "Academic videos for journals, teaching, and outreach.",
     learnMoreVideo: "Learn more about Video Production →",
+    learnMoreLanguage: "Learn More About English Language Editing →",
+    languageHeroEyebrow: "English Language Editing",
+    languageHeroTitle: "Professional manuscript editing",
+    languageHeroLead:
+      "Certified editing by language specialists. Choose Standard, Rapid, or Academic packages to match your timeline, field, and submission goals.",
     examples: "Examples",
     faqChip: "FAQ",
     backToServices: "Back to Author Services",
@@ -205,6 +210,11 @@ const MDPI_I18N = {
     },
     videoCardDesc: "适用于期刊、教学与科研传播的学术视频。",
     learnMoreVideo: "了解更多视频制作服务 →",
+    learnMoreLanguage: "了解更多英语语言润色服务 →",
+    languageHeroEyebrow: "英语语言润色",
+    languageHeroTitle: "专业稿件润色",
+    languageHeroLead:
+      "由语言专家提供认证润色。选择 Standard、Rapid 或 Academic 套餐，匹配您的周期、学科与投稿目标。",
     examples: "示例",
     faqChip: "常见问题",
     backToServices: "返回作者服务",
