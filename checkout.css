@@ -23,10 +23,16 @@
   padding: 0.875rem 0;
 }
 
-.checkout-header .logo-img {
-  height: 2rem;
-  width: auto;
-  max-width: min(220px, 42vw);
+.checkout-header .logo {
+  gap: 0.75rem;
+}
+
+.checkout-header .logo-img-mdpi {
+  height: 1.75rem;
+}
+
+.checkout-header .logo-img-author-services {
+  height: 1.85rem;
 }
 
 .checkout-header-actions {
@@ -142,8 +148,9 @@
 }
 
 .checkout-shell {
-  max-width: 1120px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .checkout-layout {
@@ -848,6 +855,8 @@
 
 .checkout-actions-end {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.75rem;
   margin-left: auto;
 }
@@ -1005,7 +1014,10 @@
 }
 
 .checkout-page .form-field textarea {
-  min-height: 6.5rem;
+  min-height: 7.5rem;
+  resize: vertical;
+  background: var(--white);
+  color: var(--text);
 }
 
 .checkout-page .form-hint {

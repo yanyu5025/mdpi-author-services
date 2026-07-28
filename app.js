@@ -438,15 +438,9 @@ function hasRequiredManuscriptUpload(services) {
 }
 
 function clearManuscriptUploadError() {
-  const alertEl = document.getElementById("manuscript-upload-alert");
   const zone = document.getElementById("quote-upload-zone");
-  const messageEl = document.getElementById("manuscript-upload-alert-message");
-  const servicesEl = document.getElementById("manuscript-upload-alert-services");
-  alertEl?.classList.add("hidden");
   zone?.classList.remove("is-required", "is-error");
   zone?.removeAttribute("aria-invalid");
-  if (messageEl) messageEl.textContent = "";
-  if (servicesEl) servicesEl.textContent = "";
 }
 
 function focusManuscriptUpload({ openPicker = false } = {}) {
@@ -467,24 +461,9 @@ function showManuscriptUploadError(services) {
     return;
   }
 
-  const alertEl = document.getElementById("manuscript-upload-alert");
   const zone = document.getElementById("quote-upload-zone");
-  const messageEl = document.getElementById("manuscript-upload-alert-message");
-  const servicesEl = document.getElementById("manuscript-upload-alert-services");
   const serviceList = formatServiceList(required);
 
-  if (messageEl) {
-    messageEl.textContent =
-      "Please upload your manuscript before submitting your order. The selected service(s) require a manuscript upload.";
-  }
-  if (servicesEl) {
-    servicesEl.textContent =
-      required.length === 1
-        ? `Required for: ${serviceList}.`
-        : `Required for: ${serviceList}.`;
-  }
-
-  alertEl?.classList.remove("hidden");
   zone?.classList.add("is-required", "is-error");
   zone?.setAttribute("aria-invalid", "true");
 
@@ -1358,12 +1337,12 @@ function initExampleModal() {
     }
   }
 
-  function openModal(service) {
+  function openModal(service, startIndex = 0) {
     const item = EXAMPLE_GALLERY[service];
     if (!item) return;
     images = item.images || [];
     titleEl.textContent = item.title;
-    showImage(0);
+    showImage(startIndex);
     openAccessibleModal(modal, {
       trigger: document.activeElement,
       focusSelector: ".example-modal-close",
@@ -1382,7 +1361,7 @@ function initExampleModal() {
       if (service === "video") return; // handled by initVideoExampleModal
       event.preventDefault();
       event.stopPropagation();
-      openModal(service);
+      openModal(service, Number(btn.dataset.exampleIndex) || 0);
     });
   });
 
@@ -1964,17 +1943,41 @@ function buildOrderPayload() {
     detectedTables: lastManuscriptDetection?.tables || 0,
     pricing: quote.pricing,
     createdAt: new Date().toISOString(),
-    details: {},
-    invoice: {},
-    review: {},
   };
 }
 
 function saveOrderAndGoToCheckout() {
   const payload = buildOrderPayload();
   if (!payload) return false;
-  // All selected services share the same checkout gate: account → details → …
-  sessionStorage.setItem("mdpi-as-order-v1", JSON.stringify(payload));
+
+  // Preserve previously saved checkout form data when returning from the quote.
+  let previous = null;
+  try {
+    const raw =
+      sessionStorage.getItem("mdpi-as-order-v1") || localStorage.getItem("mdpi-as-order-v1");
+    previous = raw ? JSON.parse(raw) : null;
+  } catch {
+    previous = null;
+  }
+  if (previous && !previous.status) {
+    payload.details = previous.details && typeof previous.details === "object" ? previous.details : {};
+    payload.invoice = previous.invoice && typeof previous.invoice === "object" ? previous.invoice : {};
+    payload.review = previous.review && typeof previous.review === "object" ? previous.review : {};
+    if (previous.checkoutStep && previous.checkoutStep !== "confirmation") {
+      payload.checkoutStep = previous.checkoutStep;
+    }
+    if (previous.invoiceId) payload.invoiceId = previous.invoiceId;
+    if (previous.savedAt) payload.savedAt = previous.savedAt;
+  } else {
+    payload.details = {};
+    payload.invoice = {};
+    payload.review = {};
+  }
+
+  const json = JSON.stringify(payload);
+  sessionStorage.setItem("mdpi-as-order-v1", json);
+  localStorage.setItem("mdpi-as-order-v1", json);
+
   let loggedIn = false;
   try {
     const auth = JSON.parse(sessionStorage.getItem("mdpi-as-auth-v1") || "null");
@@ -2049,6 +2052,7 @@ function syncFormState() {
     if (service === "figures") {
       const showFiguresPanel =
         hasFigures ||
+        figuresSelectiveOptIn ||
         (hasLanguage && (isAcademic || hasDetectedFigures || figuresSelectiveOptIn));
       togglePanel(service, showFiguresPanel);
       return;
@@ -2058,6 +2062,7 @@ function syncFormState() {
       togglePanel(
         service,
         layoutNowSelected ||
+          layoutSelectiveOptIn ||
           layoutIncludedByE3 ||
           (hasLanguage && !!lastManuscriptDetection)
       );
@@ -2156,9 +2161,17 @@ function syncFormState() {
     setServiceChecked("figures", figuresSelectiveOptIn);
   }
 
+  // Re-read after any forced figure/layout service updates.
+  const figuresSelectedNow =
+    figuresSelectiveOptIn || getSelectedServices().includes("figures");
+  const layoutSelectedNow =
+    layoutIncludedByE3 ||
+    layoutSelectiveOptIn ||
+    getSelectedServices().includes("layout");
+
   if (figureOptInRow && quoteIncludeFigures) {
     const showFigurePanel =
-      figuresNowSelected ||
+      figuresSelectedNow ||
       (hasLanguage &&
         (isAcademic || hasFigureItems || hasDetectedFigures));
     figureOptInRow.classList.toggle("hidden", !showFigurePanel);
@@ -2166,7 +2179,7 @@ function syncFormState() {
     figureOptInRow.classList.toggle("is-locked", false);
     figureOptInRow.classList.toggle("is-selective", true);
     quoteIncludeFigures.disabled = false;
-    quoteIncludeFigures.checked = figuresSelectiveOptIn || hasFigures;
+    quoteIncludeFigures.checked = figuresSelectedNow;
 
     const tierShort = TIER_LABELS[tier] || tier;
     const discountPct = hasLanguage
@@ -2191,7 +2204,7 @@ function syncFormState() {
     }
   }
 
-  const showFigureFields = figuresNowSelected;
+  const showFigureFields = figuresSelectedNow;
   figureOptFields?.classList.toggle("hidden", !showFigureFields);
 
   if (showFigureFields && hasDetectedFigures && form.figures && !figuresCountUserEdited) {
@@ -2210,14 +2223,14 @@ function syncFormState() {
   }
 
   const figureDiscount =
-    hasLanguage && figuresNowSelected
+    hasLanguage && figuresSelectedNow
       ? FIGURE_DISCOUNT[tier] ?? 0
       : 0;
   figuresDiscountHint.classList.toggle(
     "hidden",
-    !(figuresNowSelected && figureDiscount > 0)
+    !(figuresSelectedNow && figureDiscount > 0)
   );
-  if (figuresDiscountHint && figuresNowSelected && figureDiscount > 0) {
+  if (figuresDiscountHint && figuresSelectedNow && figureDiscount > 0) {
     figuresDiscountHint.textContent = `${Math.round(
       figureDiscount * 100
     )}% off Figure & Table Editing with your ${TIER_LABELS[tier]} Language Editing service.`;
@@ -2225,9 +2238,9 @@ function syncFormState() {
 
   layoutFreeHint?.classList.toggle(
     "hidden",
-    !(layoutNowSelected && hasLanguage && isAcademic)
+    !(layoutSelectedNow && hasLanguage && isAcademic)
   );
-  if (layoutFreeHint && layoutNowSelected && hasLanguage && isAcademic) {
+  if (layoutFreeHint && layoutSelectedNow && hasLanguage && isAcademic) {
     layoutFreeHint.textContent =
       "Free Layout Editing for MDPI journals with your Academic Language Editing service.";
   }
@@ -2238,6 +2251,7 @@ function syncFormState() {
   }
 
   updateAcademicRecommendation(hasLanguage, tier);
+  updateTierSelectionUI(hasLanguage, tier);
   updateCompanionServiceCards(hasLanguage, tier, isAcademic);
   updateVideoTypeOptions();
   renderVideoCampaignPrices();
@@ -2245,6 +2259,123 @@ function syncFormState() {
   updateSubmitOrderState(getSelectedServices());
 
   calculateQuote();
+}
+
+function updateTierSelectionUI(hasLanguage, tier) {
+  const tierGrid = document.querySelector(".tier-grid");
+  tierGrid?.classList.toggle("has-tier-selection", !!hasLanguage);
+
+  document.querySelectorAll(".tier-grid .tier-card").forEach((card) => {
+    const cardTier = card.dataset.tier;
+    const isSelected = !!hasLanguage && cardTier === tier;
+    card.classList.toggle("is-selected", isSelected);
+
+    const btn = card.querySelector(".select-tier");
+    if (!btn) return;
+
+    const idle =
+      btn.dataset.labelIdle ||
+      `Select ${cardTier.charAt(0).toUpperCase()}${cardTier.slice(1)}`;
+    const selectedLabel =
+      btn.dataset.labelSelected ||
+      `${cardTier.charAt(0).toUpperCase()}${cardTier.slice(1)} Selected`;
+
+    btn.dataset.labelIdle = idle;
+    btn.textContent = isSelected ? selectedLabel : idle;
+    btn.setAttribute("aria-pressed", String(isSelected));
+
+    if (isSelected) {
+      btn.classList.add("btn-primary");
+      btn.classList.remove("btn-outline", "btn-tier-secondary");
+    } else if (!hasLanguage && cardTier === "rapid") {
+      btn.classList.add("btn-primary");
+      btn.classList.remove("btn-outline", "btn-tier-secondary");
+    } else if (hasLanguage) {
+      btn.classList.remove("btn-primary", "btn-outline");
+      btn.classList.add("btn-tier-secondary");
+    } else {
+      btn.classList.add("btn-outline");
+      btn.classList.remove("btn-primary", "btn-tier-secondary");
+    }
+  });
+}
+
+let companionScrollAnim = null;
+
+function cancelCompanionScroll() {
+  if (companionScrollAnim) {
+    cancelAnimationFrame(companionScrollAnim);
+    companionScrollAnim = null;
+  }
+}
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function scrollToCompanionServices() {
+  const title =
+    document.querySelector("#editing-companion-services .editing-companion-title") ||
+    document.getElementById("editing-companion-services");
+  if (!title) return;
+
+  cancelCompanionScroll();
+
+  // Bring the section title into the lower half of the viewport so
+  // the selected language-editing card stays visible above.
+  const viewportAnchor = Math.min(window.innerHeight * 0.62, window.innerHeight - 140);
+  const destination = Math.max(
+    0,
+    title.getBoundingClientRect().top + window.scrollY - viewportAnchor
+  );
+  const start = window.scrollY;
+  const distance = destination - start;
+  if (Math.abs(distance) < 8) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) {
+    window.scrollTo(0, destination);
+    return;
+  }
+
+  const duration = 1600;
+  const startTime = performance.now();
+
+  const step = (now) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(1, elapsed / duration);
+    window.scrollTo(0, start + distance * easeInOutCubic(progress));
+    if (progress < 1) {
+      companionScrollAnim = requestAnimationFrame(step);
+    } else {
+      companionScrollAnim = null;
+    }
+  };
+
+  companionScrollAnim = requestAnimationFrame(step);
+}
+
+function toggleLanguageTierSelection(tier) {
+  if (!form || !tier) return;
+
+  const hasLanguage = getSelectedServices().includes("language");
+  const isSameSelected = hasLanguage && form.tier.value === tier;
+
+  if (isSameSelected) {
+    cancelCompanionScroll();
+    setServiceChecked("language", false);
+    syncFormState();
+    showToast("Language editing deselected.");
+    return;
+  }
+
+  form.tier.value = tier;
+  setServiceChecked("language", true);
+  syncFormState();
+  scrollToCompanionServices();
+  showToast(
+    `${tier.charAt(0).toUpperCase() + tier.slice(1)} selected. Add optional services below.`
+  );
 }
 
 function companionServiceSelected(service) {
@@ -2453,9 +2584,15 @@ function setCompanionService(service, selected) {
     ) {
       form.figures.value = String(lastManuscriptDetection.items);
     }
+    const quoteIncludeFigures = document.getElementById("quote-include-figures");
+    if (quoteIncludeFigures) quoteIncludeFigures.checked = !!selected;
   } else if (service === "layout") {
     layoutSelectiveOptIn = !!selected;
     setServiceChecked("layout", !!selected);
+    const quoteIncludeLayout = document.getElementById("quote-include-layout");
+    if (quoteIncludeLayout && !isAcademicTier()) {
+      quoteIncludeLayout.checked = !!selected;
+    }
   } else {
     setServiceChecked(service, !!selected);
   }
@@ -2463,44 +2600,106 @@ function setCompanionService(service, selected) {
   syncFormState();
 }
 
-function goToCompanionQuote() {
+function syncQuoteOptInsFromFlags() {
+  const quoteIncludeFigures = document.getElementById("quote-include-figures");
+  const quoteIncludeLayout = document.getElementById("quote-include-layout");
+  const hasLanguage = getSelectedServices().includes("language");
+  const isAcademic = form?.tier?.value === "academic";
+
+  if (quoteIncludeFigures) {
+    quoteIncludeFigures.checked =
+      figuresSelectiveOptIn || getSelectedServices().includes("figures");
+  }
+
+  if (quoteIncludeLayout) {
+    quoteIncludeLayout.checked =
+      (hasLanguage && isAcademic) ||
+      layoutSelectiveOptIn ||
+      getSelectedServices().includes("layout");
+  }
+}
+
+function applyServiceSelectionFromCards() {
   if (!form) return;
+
+  const selectedTierCard = document.querySelector(".tier-grid .tier-card.is-selected");
+  if (selectedTierCard?.dataset.tier) {
+    form.tier.value = selectedTierCard.dataset.tier;
+    setServiceChecked("language", true);
+  }
 
   ["figures", "layout"].forEach((service) => {
     const input = document.querySelector(
       `.select-companion[data-companion-service="${service}"]`
     );
     if (!input) return;
+
     if (companionServiceLocked(service)) {
-      setCompanionService(service, true);
+      if (service === "layout") {
+        layoutSelectiveOptIn = true;
+        setServiceChecked("layout", true);
+      }
+      input.checked = true;
       return;
     }
-    setCompanionService(service, input.checked);
+
+    if (service === "figures") {
+      figuresSelectiveOptIn = !!input.checked;
+      setServiceChecked("figures", !!input.checked);
+      if (!input.checked && form.figures) {
+        form.figures.value = "";
+        figuresCountUserEdited = false;
+      } else if (
+        input.checked &&
+        lastManuscriptDetection?.items > 0 &&
+        form.figures &&
+        !figuresCountUserEdited
+      ) {
+        form.figures.value = String(lastManuscriptDetection.items);
+      }
+    } else if (service === "layout") {
+      layoutSelectiveOptIn = !!input.checked;
+      setServiceChecked("layout", !!input.checked);
+    }
   });
 
+  syncQuoteOptInsFromFlags();
+}
+
+function goToCompanionQuote() {
+  if (!form) return;
+
+  applyServiceSelectionFromCards();
   syncFormState();
-  document.getElementById("quote")?.scrollIntoView({ behavior: "smooth" });
+  document.getElementById("quote")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const selected = ["figures", "layout"].filter((service) =>
     companionServiceSelected(service)
   );
   const hasLanguage = getSelectedServices().includes("language");
+  const tierLabel = TIER_LABELS[form.tier.value] || form.tier.value;
 
   if (selected.length === 0 && !hasLanguage) {
-    showToast("Select Figure & Table Editing and/or Layout Editing, then get a quote.");
+    showToast("Select an editing tier and/or Figure & Table / Layout services, then get a quote.");
     return;
   }
 
-  if (selected.length === 0) {
-    showToast("Continue to your quote to configure your selected services.");
+  if (hasLanguage && selected.length === 0) {
+    showToast(`${tierLabel} Language Editing selected. Continue configuring your quote.`);
     return;
   }
 
-  const names = selected.map(companionServiceLabel);
+  if (!hasLanguage && selected.length > 0) {
+    showToast(
+      `${selected.map(companionServiceLabel).join(" and ")} selected. Continue configuring your quote.`
+    );
+    return;
+  }
+
   showToast(
-    hasLanguage
-      ? `${names.join(" and ")} added. Continue configuring your quote.`
-      : `${names.join(" and ")} selected. Continue configuring your quote.`
+    `${tierLabel} Language Editing plus ${selected
+      .map(companionServiceLabel)
+      .join(" and ")} selected. Continue configuring your quote.`
   );
 }
 
@@ -2853,15 +3052,29 @@ document.addEventListener("keydown", (event) => {
 });
 
 if (form) {
-  document.querySelectorAll(".select-tier").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const tier = btn.dataset.tier;
-      form.tier.value = tier;
-      setServiceChecked("language", true);
-      document.getElementById("quote").scrollIntoView({ behavior: "smooth" });
-      syncFormState();
-      showToast(`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier selected.`);
+  document.querySelectorAll(".tier-grid .tier-card").forEach((card) => {
+    const btn = card.querySelector(".select-tier");
+    const activate = (event) => {
+      event.preventDefault();
+      toggleLanguageTierSelection(card.dataset.tier);
+    };
+
+    btn?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      activate(event);
     });
+
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a, button, input, label")) return;
+      activate(event);
+    });
+  });
+
+  document.getElementById("select-recommended-academic")?.addEventListener("click", () => {
+    form.tier.value = "academic";
+    setServiceChecked("language", true);
+    syncFormState();
+    showToast("Academic tier selected.");
   });
 
   document.querySelectorAll(".select-companion").forEach((input) => {
@@ -2915,6 +3128,8 @@ if (form) {
       ) {
         form.figures.value = String(lastManuscriptDetection.items);
       }
+      const quoteIncludeFigures = document.getElementById("quote-include-figures");
+      if (quoteIncludeFigures) quoteIncludeFigures.checked = !!event.target.checked;
     }
     if (
       event.target?.name === "service" &&
@@ -2922,6 +3137,8 @@ if (form) {
       event.target.dataset.lockedByAcademic !== "1"
     ) {
       layoutSelectiveOptIn = !!event.target.checked;
+      const quoteIncludeLayout = document.getElementById("quote-include-layout");
+      if (quoteIncludeLayout) quoteIncludeLayout.checked = !!event.target.checked;
     }
     // Academic locks Layout as included — ignore user uncheck attempts.
     if (
@@ -2932,11 +3149,20 @@ if (form) {
     ) {
       event.target.checked = true;
     }
+    // Keep language editing cards in sync when the quote checklist changes.
+    if (event.target?.name === "service" && event.target?.value === "language") {
+      if (!event.target.checked) {
+        cancelCompanionScroll();
+      }
+    }
     syncFormState();
   });
 
-  // Ensure tier changes immediately refresh the Academic hint + Layout inclusion.
+  // Ensure tier changes immediately refresh the Academic hint + Layout inclusion + cards.
   form.tier?.addEventListener("change", () => {
+    if (getSelectedServices().includes("language")) {
+      setServiceChecked("language", true);
+    }
     syncFormState();
   });
 
@@ -2980,14 +3206,6 @@ if (form) {
 
   form.addEventListener("submit", handleQuoteSubmit);
 
-  document
-    .getElementById("manuscript-upload-alert-btn")
-    ?.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      focusManuscriptUpload({ openPicker: true });
-    });
-
   document.getElementById("check-ioap-btn")?.addEventListener("click", () => {
     document.getElementById("quote").scrollIntoView({ behavior: "smooth" });
     syncFormState();
@@ -3030,7 +3248,9 @@ if (form) {
     slides.forEach((slide, i) => {
       const on = i === active;
       slide.classList.toggle("is-active", on);
-      slide.hidden = !on;
+      if (on) slide.removeAttribute("hidden");
+      else slide.setAttribute("hidden", "");
+      slide.setAttribute("aria-hidden", on ? "false" : "true");
     });
     dots.forEach((dot, i) => {
       const on = i === active;
@@ -3054,6 +3274,30 @@ if (form) {
 
   show(0);
   restart();
+})();
+
+(function initPromoPopup() {
+  const popup = document.querySelector("[data-promo-popup]");
+  if (!popup) return;
+
+  const storageKey = "mdpi-editing-promo-dismissed";
+  try {
+    if (sessionStorage.getItem(storageKey) === "1") {
+      popup.classList.add("is-dismissed");
+      return;
+    }
+  } catch (_) {
+    /* ignore storage errors */
+  }
+
+  popup.querySelector("[data-promo-dismiss]")?.addEventListener("click", () => {
+    popup.classList.add("is-dismissed");
+    try {
+      sessionStorage.setItem(storageKey, "1");
+    } catch (_) {
+      /* ignore storage errors */
+    }
+  });
 })();
 
 initExampleModal();

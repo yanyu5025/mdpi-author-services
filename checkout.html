@@ -5,27 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout | MDPI Author Services</title>
     <link rel="stylesheet" href="fonts.css?v=20260716b" />
-    <link rel="stylesheet" href="styles.css?v=20260728m" />
-    <link rel="stylesheet" href="ux-enhance.css?v=20260716b" />
-    <link rel="stylesheet" href="checkout.css?v=20260728c" />
+    <link rel="stylesheet" href="styles.css?v=20260728u" />
+    <link rel="stylesheet" href="ux-enhance.css?v=20260728p" />
+    <link rel="stylesheet" href="checkout.css?v=20260728f" />
   </head>
   <body class="checkout-page">
     <a href="#checkout-main" class="skip-link" data-i18n="skipToContent">Skip to checkout content</a>
     <header class="checkout-header">
       <div class="container checkout-header-inner">
-        <a href="index.html" class="logo">
+        <a href="index.html" class="logo" aria-label="MDPI Author Services">
           <img
-            class="logo-img"
-            src="assets/mdpi-authors-services-logo.svg"
-            alt="MDPI Author Services"
-            width="180"
-            height="32"
+            class="logo-img logo-img-mdpi"
+            src="assets/mdpi-logo-mark.png"
+            alt="MDPI"
+            width="90"
+            height="60"
+          />
+          <span class="logo-divider" aria-hidden="true"></span>
+          <img
+            class="logo-img logo-img-author-services"
+            src="assets/author-services-logo.png"
+            alt="Author Services"
+            width="160"
+            height="80"
           />
         </a>
         <div class="checkout-header-actions">
+          <a href="index.html#quote" class="checkout-back-link" data-i18n="checkoutEditQuote">← Edit quote</a>
+          <div class="header-auth" data-header-auth></div>
           <a
             href="https://www.mdpi.com"
-            class="header-mdpi-link"
+            class="btn btn-tertiary btn-sm header-mdpi-link"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -33,8 +43,6 @@
             <svg class="icon-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             <span class="visually-hidden" data-i18n="headerMdpiHint">(opens in new tab)</span>
           </a>
-          <div class="header-auth" data-header-auth></div>
-          <a href="index.html#quote" class="checkout-back-link" data-i18n="checkoutEditQuote">← Edit quote</a>
         </div>
       </div>
     </header>
@@ -57,11 +65,19 @@
       <div class="container footer-inner">
         <div class="footer-brand">
           <img
-            class="logo-img"
-            src="assets/mdpi-authors-services-logo.svg"
-            alt="MDPI Author Services"
-            width="180"
-            height="32"
+            class="logo-img logo-img-mdpi"
+            src="assets/mdpi-logo-mark.png"
+            alt="MDPI"
+            width="90"
+            height="60"
+          />
+          <span class="logo-divider" aria-hidden="true"></span>
+          <img
+            class="logo-img logo-img-author-services"
+            src="assets/author-services-logo.png"
+            alt="Author Services"
+            width="160"
+            height="80"
           />
         </div>
         <p class="footer-note">Prototype checkout — payment is simulated for demonstration.</p>
@@ -72,6 +88,6 @@
     <script src="money.js?v=20260723b"></script>
     <script src="auth.js?v=20260728b"></script>
     <script src="i18n.js?v=20260728e"></script>
-    <script src="checkout.js?v=20260728g"></script>
+    <script src="checkout.js?v=20260728m"></script>
   </body>
 </html>

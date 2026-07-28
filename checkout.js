@@ -149,7 +149,8 @@ let invoiceId = null;
 
 function loadOrder() {
   try {
-    const raw = sessionStorage.getItem(ORDER_STORAGE_KEY);
+    const raw =
+      sessionStorage.getItem(ORDER_STORAGE_KEY) || localStorage.getItem(ORDER_STORAGE_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -158,7 +159,11 @@ function loadOrder() {
 }
 
 function saveOrder() {
-  sessionStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(order));
+  if (!order) return;
+  const json = JSON.stringify(order);
+  sessionStorage.setItem(ORDER_STORAGE_KEY, json);
+  // Mirror to localStorage so progress survives leaving and returning later.
+  localStorage.setItem(ORDER_STORAGE_KEY, json);
 }
 
 function formatMoney(amount, currency = "CHF") {
@@ -208,11 +213,14 @@ function setCheckoutStep(step) {
     step = "account";
   }
   checkoutStep = step;
+  if (step !== "confirmation") {
+    order.checkoutStep = step;
+  }
   if (step === "review" && !invoiceId) {
     invoiceId = generateInvoiceId();
     order.invoiceId = invoiceId;
-    saveOrder();
   }
+  saveOrder();
   renderCheckout();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -220,10 +228,6 @@ function setCheckoutStep(step) {
 function validateDetails() {
   if (order.services.includes("language") && !order.details.languageTitle?.trim()) {
     alert("Please enter the manuscript title for English Language Editing.");
-    return false;
-  }
-  if (order.services.includes("figures") && !order.details.figureRequestDetails?.trim()) {
-    alert("Please enter Figure and Table Editing request details.");
     return false;
   }
   if (order.services.includes("layout") && !order.details.layoutJournal) {
@@ -269,35 +273,61 @@ function validateReview() {
 }
 
 function collectDetailsFromForm() {
+  // Only collect when the details form is mounted — never wipe saved values from another step.
+  const hasDetailsForm = !!(
+    document.getElementById("detail-manuscript-id") ||
+    document.getElementById("detail-manuscript-title") ||
+    document.getElementById("detail-figure-request") ||
+    document.getElementById("detail-layout-journal") ||
+    document.getElementById("detail-graphical-notes") ||
+    document.getElementById("detail-video-doi") ||
+    document.getElementById("detail-video-notes")
+  );
+  if (!hasDetailsForm) return;
+
   order.details = order.details || {};
   if (order.services.includes("language")) {
-    order.details.manuscriptId = document.getElementById("detail-manuscript-id")?.value.trim() || "";
-    order.details.languageTitle = document.getElementById("detail-manuscript-title")?.value.trim() || "";
+    const manuscriptIdEl = document.getElementById("detail-manuscript-id");
+    const titleEl = document.getElementById("detail-manuscript-title");
+    if (manuscriptIdEl) order.details.manuscriptId = manuscriptIdEl.value.trim();
+    if (titleEl) order.details.languageTitle = titleEl.value.trim();
   }
   if (order.services.includes("figures")) {
-    order.details.figureRequestDetails =
-      document.getElementById("detail-figure-request")?.value.trim() || "";
+    const figureEl = document.getElementById("detail-figure-request");
+    if (figureEl) order.details.figureRequestDetails = figureEl.value.trim();
   }
   if (order.services.includes("layout")) {
-    order.details.layoutJournal = document.getElementById("detail-layout-journal")?.value || "";
+    const journalEl = document.getElementById("detail-layout-journal");
+    if (journalEl) order.details.layoutJournal = journalEl.value;
+  }
+  if (order.services.includes("graphical")) {
+    const notesEl = document.getElementById("detail-graphical-notes");
+    if (notesEl) order.details.graphicalNotes = notesEl.value.trim();
   }
   if (order.services.includes("video")) {
+    const doiEl = document.getElementById("detail-video-doi");
+    const notesEl = document.getElementById("detail-video-notes");
     order.details.videoType = order.videoType;
-    order.details.videoManuscriptLink =
-      document.getElementById("detail-video-doi")?.value.trim() || "";
-    order.details.videoProducerNotes =
-      document.getElementById("detail-video-notes")?.value.trim() || "";
-    order.details.videoPublishChannels = [
-      ...document.querySelectorAll('input[name="detailVideoPublishChannels"]:checked'),
-    ].map((el) => el.value);
+    if (doiEl) order.details.videoManuscriptLink = doiEl.value.trim();
+    if (notesEl) order.details.videoProducerNotes = notesEl.value.trim();
+    const channelInputs = document.querySelectorAll('input[name="detailVideoPublishChannels"]');
+    if (channelInputs.length) {
+      order.details.videoPublishChannels = [
+        ...document.querySelectorAll('input[name="detailVideoPublishChannels"]:checked'),
+      ].map((el) => el.value);
+    }
     syncVideoPricing();
   }
   saveOrder();
 }
 
 function collectInvoiceFromForm() {
+  // Guard: invoice fields are only present on the invoice step.
+  const firstNameEl = document.getElementById("invoice-first-name");
+  if (!firstNameEl) return;
   order.invoice = {
-    invoiceFirstName: document.getElementById("invoice-first-name")?.value.trim() || "",
+    ...(order.invoice || {}),
+    invoiceFirstName: firstNameEl.value.trim(),
     invoiceLastName: document.getElementById("invoice-last-name")?.value.trim() || "",
     invoiceEmail: document.getElementById("invoice-email")?.value.trim() || "",
     invoiceCountry: document.getElementById("invoice-country")?.value || "",
@@ -312,8 +342,20 @@ function collectInvoiceFromForm() {
 }
 
 function collectReviewFromForm() {
+  const agreeEl = document.getElementById("review-agree-terms");
+  if (!agreeEl) return;
   order.review = order.review || {};
-  order.review.agreeTerms = !!document.getElementById("review-agree-terms")?.checked;
+  order.review.agreeTerms = !!agreeEl.checked;
+  saveOrder();
+}
+
+/** Persist the currently visible checkout step without clobbering other steps. */
+function persistCurrentCheckoutStep() {
+  if (checkoutStep === "details") collectDetailsFromForm();
+  else if (checkoutStep === "invoice") collectInvoiceFromForm();
+  else if (checkoutStep === "review") collectReviewFromForm();
+  order.checkoutStep = checkoutStep;
+  order.savedAt = new Date().toISOString();
   saveOrder();
 }
 
@@ -321,7 +363,7 @@ const STEP_META = {
   account: {
     eyebrow: "Step 1 of 5",
     title: "Log In",
-    desc: "Sign in with your MDPI account to continue this order. This step applies to every selected service before service details.",
+    desc: "",
   },
   details: {
     eyebrow: "Step 2 of 5",
@@ -351,7 +393,7 @@ function renderStepHeader(step) {
     <header class="checkout-step-header">
       <p class="checkout-step-eyebrow">${meta.eyebrow || ""}</p>
       <h1>${meta.title || ""}</h1>
-      <p class="checkout-step-desc">${meta.desc || ""}</p>
+      ${meta.desc ? `<p class="checkout-step-desc">${meta.desc}</p>` : ""}
     </header>`;
 }
 
@@ -416,6 +458,47 @@ function renderActions(backTarget, backLabel, nextTarget, nextLabel) {
     </div>`;
 }
 
+function defaultFigureRequestDetails() {
+  const count = Math.max(0, Number(order?.figures) || 0);
+  if (count > 0) {
+    return `I would like all ${count} figure/table item${count === 1 ? "" : "s"} included in this order to be edited to meet the journal guidelines. Please adjust this note with any specific figure or table numbers and requirements.`;
+  }
+  return "I would like my figures and tables to be edited to meet the journal guidelines. Please adjust this note with any specific figure or table numbers and requirements.";
+}
+
+let autoSaveTimer = null;
+
+/** Silently persist the current step as the author types or changes fields. */
+function scheduleAutoSave() {
+  if (!["details", "invoice", "review"].includes(checkoutStep)) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    persistCurrentCheckoutStep();
+  }, 250);
+}
+
+function bindCheckoutAutoSave() {
+  if (!["details", "invoice", "review"].includes(checkoutStep)) return;
+  const panel = document.querySelector(".checkout-step-panel");
+  if (!panel) return;
+
+  const onFieldUpdate = (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.matches("input, select, textarea")) return;
+    // Immediate save for discrete controls; debounced for typing.
+    if (event.type === "change" || target.matches("select, input[type='checkbox'], input[type='radio']")) {
+      clearTimeout(autoSaveTimer);
+      persistCurrentCheckoutStep();
+      return;
+    }
+    scheduleAutoSave();
+  };
+
+  panel.addEventListener("input", onFieldUpdate);
+  panel.addEventListener("change", onFieldUpdate);
+}
+
 function renderReviewDetailsSummary() {
   const d = order.details || {};
   const inv = order.invoice || {};
@@ -460,7 +543,7 @@ function renderReviewDetailsSummary() {
       <article class="checkout-review-card">
         <h3>${SERVICE_TITLES.graphical}</h3>
         <dl class="checkout-review-list">
-          <div><dt>Status</dt><dd>Materials to be collected after order</dd></div>
+          <div><dt>Notes</dt><dd>${escapeHtml(d.graphicalNotes) || "—"}</dd></div>
         </dl>
       </article>`;
   }
@@ -756,17 +839,13 @@ function renderAccountStep() {
     ${renderStepHeader("account")}
     <section class="checkout-account-card">
       <p class="checkout-account-lead">
-        You submitted an order with <strong>${escapeHtml(serviceLabel)}</strong>.
-        Log in with your MDPI account to continue. After authentication you will return here to finish the remaining checkout steps.
+        You submitted an order with ${escapeHtml(String(serviceCount))} selected service${serviceCount === 1 ? "" : "s"}. Log in with your MDPI account to continue. After signing in, you will be returned here to complete the remaining checkout steps.
       </p>
       <div class="checkout-account-actions">
         <button type="button" class="btn btn-primary" id="checkout-login-btn">
           Log In
         </button>
       </div>
-      <p class="checkout-account-hint" id="checkout-account-hint">
-        Log In opens the MDPI sign-in page. When sign-in succeeds, you are returned to this order to continue with service details.
-      </p>
       <div class="checkout-actions">
         <button type="button" class="btn btn-outline" data-checkout-back="quote">← Edit quote</button>
         <div class="checkout-actions-end">
@@ -800,14 +879,17 @@ function renderDetailsStep() {
   }
 
   if (order.services.includes("figures")) {
+    const figureRequestValue =
+      d.figureRequestDetails?.trim() || defaultFigureRequestDetails();
     blocks += `
       <section class="checkout-service-block">
         <span class="checkout-service-badge">Figures &amp; tables</span>
         <h2>${SERVICE_TITLES.figures}</h2>
         <p class="form-hint">${order.figures} figure/table item${order.figures === 1 ? "" : "s"} included from your quote.</p>
         <div class="form-field">
-          <label for="detail-figure-request">Figure and Table Editing Request Details <span class="required-mark">*</span></label>
-          <textarea id="detail-figure-request" rows="4" placeholder="e.g., I would like Figures 1,2,x... and Tables 1,2,x... to be edited to meet the journal guidelines." required>${escapeHtml(d.figureRequestDetails)}</textarea>
+          <label for="detail-figure-request">Figure and Table Editing Request Details</label>
+          <textarea id="detail-figure-request" rows="5" placeholder="Add any specific figure or table numbers and requirements.">${escapeHtml(figureRequestValue)}</textarea>
+          <p class="form-hint">Optional. Edit the note above or leave it blank if you prefer.</p>
         </div>
       </section>`;
   }
@@ -836,11 +918,10 @@ function renderDetailsStep() {
       <section class="checkout-service-block">
         <span class="checkout-service-badge">Graphical abstract</span>
         <h2>${SERVICE_TITLES.graphical}</h2>
-        <div class="checkout-skip-note">
-          <div class="checkout-skip-note-copy">
-            <strong>Details not required</strong>
-            <p>For the Graphical Abstract service, please proceed to the next step. After submission, you will receive an email with the list of materials we need to begin your design.</p>
-          </div>
+        <div class="form-field">
+          <label for="detail-graphical-notes">Notes for the Graphical Abstract Editing</label>
+          <textarea id="detail-graphical-notes" rows="5" placeholder="Add any design notes or instructions for the graphical abstract team.">${escapeHtml(d.graphicalNotes || "")}</textarea>
+          <p class="form-hint">Optional. Edit the note above or leave it blank if you prefer.</p>
         </div>
       </section>`;
   }
@@ -883,7 +964,7 @@ function renderDetailsStep() {
   const body = `
     ${renderStepHeader("details")}
     ${blocks}
-    ${renderActions("account", "← Back to account", "invoice", "Continue to invoice")}`;
+    ${renderActions("quote", "← Back to Edit Services", "invoice", "Continue to invoice")}`;
 
   return wrapCheckoutLayout("details", body, {
     note: "Complete each service section, then continue to billing.",
@@ -1118,21 +1199,22 @@ function renderCheckout() {
     confirmation: renderConfirmationStep,
   };
 
-  main.innerHTML = `<div class="checkout-shell">${panels[checkoutStep]()}</div>`;
+  main.innerHTML = `<div class="container"><div class="checkout-shell">${panels[checkoutStep]()}</div></div>`;
   bindCheckoutEvents();
+  bindCheckoutAutoSave();
 }
 
 function bindCheckoutEvents() {
   document.querySelectorAll("[data-checkout-back]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const target = btn.getAttribute("data-checkout-back");
+      // Always persist the current step before leaving so Back never wipes other steps.
+      clearTimeout(autoSaveTimer);
+      persistCurrentCheckoutStep();
       if (target === "quote") {
         redirectToQuote();
         return;
       }
-      if (checkoutStep === "invoice") collectDetailsFromForm();
-      if (checkoutStep === "review") collectReviewFromForm();
-      if (checkoutStep === "payment") collectInvoiceFromForm();
       setCheckoutStep(target);
     });
   });
@@ -1148,16 +1230,22 @@ function bindCheckoutEvents() {
         }
       }
       if (checkoutStep === "details") {
+        clearTimeout(autoSaveTimer);
         collectDetailsFromForm();
         if (!validateDetails()) return;
+        persistCurrentCheckoutStep();
       }
       if (checkoutStep === "invoice") {
+        clearTimeout(autoSaveTimer);
         collectInvoiceFromForm();
         if (!validateInvoice()) return;
+        persistCurrentCheckoutStep();
       }
       if (checkoutStep === "review") {
+        clearTimeout(autoSaveTimer);
         collectReviewFromForm();
         if (!validateReview()) return;
+        persistCurrentCheckoutStep();
       }
       setCheckoutStep(target);
     });
@@ -1169,9 +1257,9 @@ function bindCheckoutEvents() {
 
   // If the author started login and returned without an SSO callback (e.g. local demo), confirm manually.
   if (checkoutStep === "account" && !isLoggedIn() && loadAuthState()?.loginPending) {
-    const hint = document.getElementById("checkout-account-hint");
-    if (hint) {
-      hint.innerHTML =
+    const lead = document.querySelector(".checkout-account-lead");
+    if (lead) {
+      lead.textContent =
         "Welcome back. If you finished signing in with MDPI, confirm below to continue your order.";
     }
     const actionsEnd = document.querySelector(".checkout-account-card .checkout-actions-end");
@@ -1253,13 +1341,23 @@ function initCheckout() {
   invoiceId = order.invoiceId || null;
 
   const returnedFromAuth = consumeAuthReturnParams();
+  const savedStep =
+    order.checkoutStep &&
+    CHECKOUT_STEPS.includes(order.checkoutStep) &&
+    order.checkoutStep !== "confirmation"
+      ? order.checkoutStep
+      : null;
+
   if (order.status === "paid") {
     checkoutStep = "confirmation";
-  } else if (returnedFromAuth || isLoggedIn()) {
-    // Authenticated authors skip the login gate for any selected service mix.
-    checkoutStep = "details";
+  } else if (returnedFromAuth) {
+    checkoutStep = savedStep && savedStep !== "account" ? savedStep : "details";
+  } else if (isLoggedIn()) {
+    checkoutStep = savedStep && savedStep !== "account" ? savedStep : "details";
+  } else if (savedStep === "account" || !savedStep) {
+    checkoutStep = "account";
   } else {
-    // Submit Order always lands here first when not signed in.
+    // Resume requires login before returning to a later saved step.
     checkoutStep = "account";
   }
 

@@ -167,32 +167,36 @@
       }
     </script>
     <link rel="stylesheet" href="fonts.css?v=20260716b" />
-    <link rel="stylesheet" href="styles.css?v=20260728m" />
-    <link rel="stylesheet" href="ux-enhance.css?v=20260728f" />
+    <link rel="stylesheet" href="styles.css?v=20260728u" />
+    <link rel="stylesheet" href="ux-enhance.css?v=20260728p" />
   </head>
   <body>
     <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to content</a>
     <header class="site-header" id="top">
       <div class="container header-inner">
-        <a href="index.html" class="logo">
+        <a href="index.html" class="logo" aria-label="MDPI Author Services">
           <img
-            class="logo-img"
-            src="assets/mdpi-authors-services-logo.svg"
-            alt="MDPI Author Services"
-            width="180"
-            height="32"
+            class="logo-img logo-img-mdpi"
+            src="assets/mdpi-logo-mark.png"
+            alt="MDPI"
+            width="90"
+            height="60"
+          />
+          <span class="logo-divider" aria-hidden="true"></span>
+          <img
+            class="logo-img logo-img-author-services"
+            src="assets/author-services-logo.png"
+            alt="Author Services"
+            width="160"
+            height="80"
           />
         </a>
-        <nav class="main-nav" id="main-nav" aria-label="Main navigation">
-          <a href="#services" data-i18n="navLanguage">Language Editing</a>
-          <a href="#additional-services" data-i18n="navMore">More Services</a>
-          <a href="#quote" data-i18n="navQuote">Get a Quote</a>
-          <a href="faq/language-editing.html" data-i18n="navFaqs">FAQs</a>
-        </nav>
         <div class="header-actions">
+          <a href="#quote" class="btn btn-primary btn-sm header-cta" data-i18n="headerCta">Get a Quote</a>
+          <div class="header-auth" data-header-auth></div>
           <a
             href="https://www.mdpi.com"
-            class="header-mdpi-link"
+            class="btn btn-tertiary btn-sm header-mdpi-link"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -200,47 +204,44 @@
             <svg class="icon-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             <span class="visually-hidden" data-i18n="headerMdpiHint">(opens in new tab)</span>
           </a>
-          <div class="header-auth" data-header-auth></div>
-          <a href="#quote" class="btn btn-primary btn-sm header-cta" data-i18n="headerCta">Get a Quote</a>
         </div>
-        <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="main-nav">
-          <span></span><span></span><span></span>
-        </button>
       </div>
     </header>
 
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
-        <div class="container hero-grid">
-          <div class="hero-content">
-            <p class="eyebrow" data-i18n="heroEyebrow">Professional editorial support for researchers</p>
-            <h1 id="hero-title" data-i18n="heroTitle">English Language Editing for Researchers</h1>
-            <p class="hero-lead" data-i18n="heroLead">
-              Certified English language editing, figure enhancement, graphical abstract creation, and video production—delivered by experts. Available to MDPI and non-MDPI authors worldwide.
-            </p>
-            <div class="hero-stats">
-              <div class="stat" role="group" aria-label="60,000 plus papers edited">
-                <strong aria-hidden="true">60,000+</strong>
-                <span data-i18n="heroStatPapers">Papers edited</span>
+        <div class="hero-grid">
+          <div class="hero-content-wrap">
+            <div class="hero-content">
+              <p class="eyebrow" data-i18n="heroEyebrow">Professional editorial support for researchers</p>
+              <h1 id="hero-title" data-i18n="heroTitle">English Language Editing for Researchers</h1>
+              <p class="hero-lead" data-i18n="heroLead">
+                Certified English language editing, figure enhancement, graphical abstract creation, and video production—delivered by experts. Available to MDPI and non-MDPI authors worldwide.
+              </p>
+              <div class="hero-stats">
+                <div class="stat" role="group" aria-label="60,000 plus papers edited">
+                  <strong aria-hidden="true">60,000+</strong>
+                  <span data-i18n="heroStatPapers">Papers edited</span>
+                </div>
+                <div class="stat" role="group" aria-label="97 percent author satisfaction">
+                  <strong aria-hidden="true">97%</strong>
+                  <span data-i18n="heroStatSatisfaction">Author satisfaction</span>
+                </div>
+                <div class="stat" role="group" aria-label="1 day rapid turnaround">
+                  <strong aria-hidden="true">1 day</strong>
+                  <span data-i18n="heroStatTurnaround">Rapid turnaround</span>
+                </div>
               </div>
-              <div class="stat" role="group" aria-label="97 percent author satisfaction">
-                <strong aria-hidden="true">97%</strong>
-                <span data-i18n="heroStatSatisfaction">Author satisfaction</span>
+              <div class="hero-actions">
+                <a href="#services" class="btn btn-outline" data-i18n="heroCompare">Compare Editing Tiers</a>
               </div>
-              <div class="stat" role="group" aria-label="1 day rapid turnaround">
-                <strong aria-hidden="true">1 day</strong>
-                <span data-i18n="heroStatTurnaround">Rapid turnaround</span>
-              </div>
+              <p class="hero-micro" data-i18n="heroMicro">Instant estimate · No commitment</p>
             </div>
-            <div class="hero-actions">
-              <a href="#quote" class="btn btn-primary" data-i18n="heroCta">Get a Free Quote</a>
-              <a href="#services" class="btn btn-outline" data-i18n="heroCompare">Compare Editing Tiers</a>
-            </div>
-            <p class="hero-micro" data-i18n="heroMicro">Instant estimate · No commitment</p>
           </div>
-          <div class="campaign-carousel" data-campaign-carousel aria-roledescription="carousel" aria-label="Promotions">
+          <div class="campaign-carousel hero-campaign-panel" data-campaign-carousel aria-roledescription="carousel" aria-label="Featured services">
             <div class="campaign-slides">
               <aside class="hero-card campaign-card campaign-slide is-active" aria-labelledby="video-campaign-title">
+                <p class="campaign-kicker" data-i18n="campaignVideoKicker">Video Production</p>
                 <h2 id="video-campaign-title" data-i18n="campaignTitle">Bring your research to life—and save 10%</h2>
                 <p class="campaign-copy" data-i18n="campaignCopy">
                   Professional academic videos for journal pages, teaching, and research outreach.
@@ -254,34 +255,88 @@
                 </div>
                 <p class="campaign-dates" data-i18n="campaignDates">Valid 1 July–30 December 2026</p>
                 <div class="campaign-actions">
-                  <a href="video-production.html" class="btn btn-primary" data-i18n="campaignExplore">Explore Video Production</a>
-                  <a href="#quote" class="btn btn-outline" data-i18n="campaignQuote">Get a Quote</a>
+                  <a href="video-production.html" class="campaign-text-link" data-i18n="campaignExplore">Explore Video Production</a>
                 </div>
               </aside>
-              <aside class="hero-card campaign-card campaign-slide" aria-labelledby="editing-campaign-title" hidden>
-                <h2 id="editing-campaign-title" data-i18n="editingCampaignTitle">Fast. Accurate. Simple.</h2>
-                <p class="campaign-copy" data-i18n="editingCampaignCopy">Get CHF 30 OFF Rapid and Academic Editing</p>
-                <div class="campaign-offer">
-                  <span class="campaign-discount" data-i18n="editingCampaignDiscount">CHF 30 OFF</span>
-                  <div>
-                    <span class="campaign-code-label" data-i18n="campaignCodeLabel">Code:</span>
-                    <strong class="campaign-code">MDPI30</strong>
-                  </div>
+              <aside class="hero-card campaign-card campaign-slide campaign-slide-figures" aria-labelledby="figures-campaign-title" hidden>
+                <p class="campaign-kicker" data-i18n="figuresCampaignKicker">Figure &amp; Table Editing</p>
+                <h2 id="figures-campaign-title" data-i18n="figuresCampaignTitle">Publication-ready figures, every time</h2>
+                <p class="campaign-copy" data-i18n="figuresCampaignCopy">
+                  See how we turn rough sketches and cluttered charts into clear, journal-ready visuals.
+                </p>
+                <div class="campaign-figure-examples" aria-label="Before and after figure examples">
+                  <figure>
+                    <button
+                      type="button"
+                      class="campaign-figure-thumb link-examples"
+                      data-example="figures"
+                      data-example-index="0"
+                      aria-label="View larger figure example: Illustration and charts"
+                    >
+                      <img
+                        src="assets/figures-example-1.png"
+                        alt="Before and after: hand-drawn synapse sketch refined into a publication illustration, plus redesigned bar charts"
+                        width="512"
+                        height="331"
+                        loading="lazy"
+                      />
+                      <span class="campaign-figure-zoom-hint" aria-hidden="true">Click to zoom</span>
+                    </button>
+                    <figcaption data-i18n="figuresCampaignExample1">Illustration &amp; charts</figcaption>
+                  </figure>
+                  <figure>
+                    <button
+                      type="button"
+                      class="campaign-figure-thumb link-examples"
+                      data-example="figures"
+                      data-example-index="1"
+                      aria-label="View larger figure example: Diagrams and data visuals"
+                    >
+                      <img
+                        src="assets/figures-example-2.png"
+                        alt="Before and after: flow diagram, line graph, and charts refined for clarity and color"
+                        width="512"
+                        height="338"
+                        loading="lazy"
+                      />
+                      <span class="campaign-figure-zoom-hint" aria-hidden="true">Click to zoom</span>
+                    </button>
+                    <figcaption data-i18n="figuresCampaignExample2">Diagrams &amp; data visuals</figcaption>
+                  </figure>
                 </div>
-                <p class="campaign-dates" data-i18n="editingCampaignDates">Valid until 30 August 2026</p>
                 <div class="campaign-actions">
-                  <a href="#quote" class="btn btn-primary" data-i18n="campaignQuote">Get a Quote</a>
-                  <a href="#services" class="btn btn-outline" data-i18n="heroCompare">Compare Editing Tiers</a>
+                  <a href="#figure-table-editing" class="campaign-text-link" data-i18n="figuresCampaignExplore">Explore Figure Editing</a>
                 </div>
               </aside>
             </div>
-            <div class="campaign-carousel-dots" role="tablist" aria-label="Choose promotion">
+            <div class="campaign-carousel-dots" role="tablist" aria-label="Choose featured service">
               <button type="button" class="campaign-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Video production promotion" data-slide="0"></button>
-              <button type="button" class="campaign-carousel-dot" role="tab" aria-selected="false" aria-label="Editing promotion" data-slide="1"></button>
+              <button type="button" class="campaign-carousel-dot" role="tab" aria-selected="false" aria-label="Figure and table editing examples" data-slide="1"></button>
             </div>
           </div>
         </div>
       </section>
+
+      <aside
+        class="promo-popup"
+        id="editing-promo-popup"
+        data-promo-popup
+        aria-labelledby="editing-promo-title"
+        role="complementary"
+      >
+        <button type="button" class="promo-popup-close" data-promo-dismiss aria-label="Dismiss promotion">×</button>
+        <p class="promo-popup-kicker" data-i18n="navLanguage">Language Editing</p>
+        <h2 id="editing-promo-title" class="promo-popup-title" data-i18n="editingCampaignTitle">Fast. Accurate. Simple.</h2>
+        <p class="promo-popup-copy" data-i18n="editingCampaignCopy">Get CHF 30 OFF Rapid and Academic Editing</p>
+        <div class="promo-popup-offer">
+          <span class="promo-popup-discount" data-i18n="editingCampaignDiscount">CHF 30 OFF</span>
+          <p class="promo-popup-howto" data-i18n-html="editingCampaignHowto">
+            Use code <strong class="promo-code-highlight">MDPI30</strong> at checkout.
+          </p>
+        </div>
+        <p class="promo-popup-dates" data-i18n="editingCampaignDates">Valid until 30 August 2026</p>
+        <a href="#quote" class="btn btn-primary btn-sm promo-popup-cta" data-i18n="campaignQuote">Get a Quote</a>
+      </aside>
 
       <section class="section journey-section" aria-labelledby="journey-title">
         <div class="container">
@@ -393,7 +448,16 @@
                   <li>Grammar, terminology, and clarity</li>
                   <li>Editing certificate</li>
                 </ul>
-                <button class="btn btn-outline btn-block select-tier" data-tier="standard">Select Standard</button>
+                <button
+                  type="button"
+                  class="btn btn-outline btn-block select-tier"
+                  data-tier="standard"
+                  data-label-idle="Select Standard"
+                  data-label-selected="Standard Selected"
+                  aria-pressed="false"
+                >
+                  Select Standard
+                </button>
               </div>
             </article>
 
@@ -421,7 +485,16 @@
                   <li>10% off Figure &amp; Table Editing</li>
                   <li>10% off Layout Editing for MDPI journals</li>
                 </ul>
-                <button class="btn btn-primary btn-block select-tier" data-tier="rapid">Select Rapid</button>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block select-tier"
+                  data-tier="rapid"
+                  data-label-idle="Select Rapid"
+                  data-label-selected="Rapid Selected"
+                  aria-pressed="false"
+                >
+                  Select Rapid
+                </button>
               </div>
             </article>
 
@@ -447,12 +520,21 @@
                   <li>50% off Figure &amp; Table Editing</li>
                   <li>Free Layout Editing for MDPI journals</li>
                 </ul>
-                <button class="btn btn-outline btn-block select-tier" data-tier="academic">Select Academic</button>
+                <button
+                  type="button"
+                  class="btn btn-outline btn-block select-tier"
+                  data-tier="academic"
+                  data-label-idle="Select Academic"
+                  data-label-selected="Academic Selected"
+                  aria-pressed="false"
+                >
+                  Select Academic
+                </button>
               </div>
             </article>
           </div>
 
-          <div class="editing-companion-panel">
+          <div class="editing-companion-panel" id="editing-companion-services">
             <div class="editing-companion-panel-head">
               <p class="editing-companion-eyebrow">Recommended with language editing</p>
               <h3 class="editing-companion-title">Figure, table &amp; layout services</h3>
@@ -525,7 +607,7 @@
                 <strong data-price-service="layout">CHF 85.00</strong>
                 <small>per submission</small>
               </p>
-              <p>MDPI house style and reference checks.</p>
+              <p>For Publications in MDPI Journals.</p>
               <span class="addon-meta">1 day</span>
               <p class="editing-companion-perk" id="layout-companion-perk" hidden></p>
               <div class="editing-companion-actions">
@@ -542,14 +624,15 @@
               </div>
             </article>
             </div>
-            <div class="editing-companion-quote">
-              <button type="button" class="btn btn-primary" id="companion-get-quote">
-                Get a Quote
-              </button>
-              <p class="editing-companion-quote-hint" id="companion-get-quote-hint">
-                Tick Figure &amp; Table Editing and/or Layout Editing, then continue to your quote.
-              </p>
-            </div>
+          </div>
+
+          <div class="editing-companion-quote services-get-quote">
+            <button type="button" class="btn btn-primary" id="companion-get-quote">
+              Get a Quote
+            </button>
+            <p class="editing-companion-quote-hint" id="companion-get-quote-hint">
+              Select an editing tier and optional add-ons, then continue to your quote.
+            </p>
           </div>
         </div>
       </section>
@@ -738,25 +821,11 @@
                   />
                   <p class="quote-upload-title">Upload manuscript (.doc / .docx)</p>
                   <p class="quote-upload-help" id="quote-upload-help">
-                    Required for all services except Video Production. Detects words and figures to pre-fill your quote.
+                    Required for all services except Video Production. We automatically detect the word count and number of figures to pre-fill your quote, ensuring a more accurate cost estimate.
                   </p>
                   <p class="quote-upload-status" id="quote-upload-status" aria-live="polite">
                     Drag &amp; drop a file here, or <span class="quote-upload-browse">browse</span>
                   </p>
-                </div>
-                <div
-                  id="manuscript-upload-alert"
-                  class="manuscript-upload-alert hidden"
-                  role="alert"
-                  aria-live="assertive"
-                >
-                  <div class="manuscript-upload-alert-body">
-                    <p id="manuscript-upload-alert-message"></p>
-                    <p class="manuscript-upload-alert-services" id="manuscript-upload-alert-services"></p>
-                  </div>
-                  <button type="button" class="btn btn-primary btn-sm" id="manuscript-upload-alert-btn">
-                    Upload manuscript
-                  </button>
                 </div>
               </fieldset>
 
@@ -1134,11 +1203,19 @@
       <div class="container footer-inner">
         <div class="footer-brand">
           <img
-            class="logo-img"
-            src="assets/mdpi-authors-services-logo.svg"
-            alt="MDPI Author Services"
-            width="125"
-            height="32"
+            class="logo-img logo-img-mdpi"
+            src="assets/mdpi-logo-mark.png"
+            alt="MDPI"
+            width="90"
+            height="60"
+          />
+          <span class="logo-divider" aria-hidden="true"></span>
+          <img
+            class="logo-img logo-img-author-services"
+            src="assets/author-services-logo.png"
+            alt="Author Services"
+            width="160"
+            height="80"
           />
         </div>
         <p class="footer-note" data-i18n="footerNote">Prototype — not affiliated with production MDPI systems.</p>
@@ -1158,8 +1235,8 @@
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
     <script src="money.js?v=20260723b"></script>
     <script src="auth.js?v=20260728b"></script>
-    <script src="i18n.js?v=20260728e"></script>
+    <script src="i18n.js?v=20260728i"></script>
     <script src="ioap-institutions.js?v=20260715a"></script>
-    <script src="app.js?v=20260728o"></script>
+    <script src="app.js?v=20260728w"></script>
   </body>
 </html>
